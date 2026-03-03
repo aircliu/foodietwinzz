@@ -20,18 +20,17 @@ function getPrevMilestone(count) {
   return prev;
 }
 
-function AnimatedNumber({ value, duration = 1800 }) {
-  const [display, setDisplay] = useState(value);
-  const prevRef = useRef(value);
+function AnimatedNumber({ value, refreshKey, duration = 1200 }) {
+  const [display, setDisplay] = useState(0);
   const rafRef = useRef(null);
 
   useEffect(() => {
-    const from = prevRef.current;
+    // Always animate: count up from ~90% of value to the full value on refresh
+    // On first load, count from 0
+    const from = display === 0 ? 0 : Math.round(value * 0.92);
     const to = value;
-    prevRef.current = value;
-    if (from === to) return;
-
     const start = performance.now();
+
     function tick(now) {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
@@ -42,7 +41,7 @@ function AnimatedNumber({ value, duration = 1800 }) {
 
     rafRef.current = requestAnimationFrame(tick);
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [value, duration]);
+  }, [value, refreshKey, duration]);
 
   return <>{display.toLocaleString()}</>;
 }
@@ -55,22 +54,20 @@ function formatCountdown(seconds) {
 
 export default function FollowerCounter() {
   const [followers, setFollowers] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [visible, setVisible] = useState(false);
   const [countdown, setCountdown] = useState(120);
   const [flash, setFlash] = useState(false);
   const ref = useRef(null);
-  const initialLoad = useRef(true);
 
   const fetchCount = useCallback(() => {
     fetch("/api/followers")
       .then((r) => r.json())
       .then((d) => {
-        setFollowers((prev) => {
-          // Flash green on any refresh (so user sees it updated)
-          setFlash(true);
-          setTimeout(() => setFlash(false), 1200);
-          return d.followers;
-        });
+        setFollowers(d.followers);
+        setRefreshKey((k) => k + 1);
+        setFlash(true);
+        setTimeout(() => setFlash(false), 1200);
       })
       .catch(() => setFollowers(FALLBACK));
   }, []);
@@ -198,7 +195,7 @@ export default function FollowerCounter() {
           marginBottom: 4,
           transition: "color 0.4s ease",
         }}>
-          {visible ? <AnimatedNumber value={count} /> : "0"}
+          {visible ? <AnimatedNumber value={count} refreshKey={refreshKey} /> : "0"}
         </div>
 
         {/* Countdown timer */}

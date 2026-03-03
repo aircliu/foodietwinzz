@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import LiveFollowerCount from "../components/LiveFollowerCount";
 
 const milestones = [
   { followers: "0", budget: "$0", status: "filmed", emoji: "🧊", label: "Ice", url: "https://www.instagram.com/p/DVZNnxDEiDY/" },
@@ -163,7 +164,14 @@ export default function Challenge() {
         </p>
 
         {/* Stats */}
-        <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
+          <div style={{
+            flex: 1, minWidth: 160,
+            background: "var(--surface)", border: "1px solid var(--cream-dim)",
+            borderRadius: 12, padding: "20px 24px", textAlign: "center",
+          }}>
+            <LiveFollowerCount style={{}} />
+          </div>
           <div style={{
             flex: 1, minWidth: 160,
             background: "var(--surface)", border: "1px solid var(--cream-dim)",

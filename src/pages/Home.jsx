@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import heroImg from "../assets/hero.png";
-import FollowerCounter from "../components/FollowerCounter";
+import LiveFollowerCount from "../components/LiveFollowerCount";
 
 function useReveal(threshold = 0.15) {
   const ref = useRef(null);
@@ -93,6 +93,11 @@ export default function Home() {
             }}></p>
           </FadeIn>
 
+          {/* Live follower count */}
+          <FadeIn visible={heroLoaded} delay={0.3} style={{ marginTop: 24 }}>
+            <LiveFollowerCount />
+          </FadeIn>
+
           {/* Rule pill */}
           <FadeIn visible={heroLoaded} delay={0.35} style={{ marginTop: 28 }}>
             <div style={{
@@ -159,11 +164,6 @@ export default function Home() {
         </div>
 
         <style>{`@keyframes heroChevronBounce { 0%,100%{ transform: translateX(-50%) translateY(0); } 50%{ transform: translateX(-50%) translateY(8px); } }`}</style>
-      </section>
-
-      {/* ===== FOLLOWER COUNTER ===== */}
-      <section style={{ padding: "80px 0 0" }}>
-        <FollowerCounter />
       </section>
 
       {/* ===== DAY COUNTER ===== */}
