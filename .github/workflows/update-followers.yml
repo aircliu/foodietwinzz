@@ -1,0 +1,69 @@
+name: Update Follower Count
+
+on:
+  schedule:
+    - cron: "*/10 * * * *" # Every 10 minutes
+  workflow_dispatch: # Manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Fetch follower count from BlastUp
+        run: |
+          node -e "
+          async function main() {
+            try {
+              const pageRes = await fetch('https://blastup.com/instagram-follower-count?foodietwinzz', {
+                headers: {
+                  'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+                  'Accept': 'text/html',
+                },
+              });
+              if (!pageRes.ok) { console.log('Page fetch failed:', pageRes.status); process.exit(0); }
+              const html = await pageRes.text();
+              const tokenMatch = html.match(/token:\s*\"([^\"]+)\"/);
+              if (!tokenMatch) { console.log('No token found'); process.exit(0); }
+              const rawCookies = pageRes.headers.getSetCookie ? pageRes.headers.getSetCookie() : [];
+              const cookies = rawCookies.map(c => c.split(';')[0]).join('; ');
+              const apiRes = await fetch('https://blastup.com/instagram-follower-count', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+                  'Referer': 'https://blastup.com/instagram-follower-count?foodietwinzz',
+                  'Cookie': cookies,
+                },
+                body: JSON.stringify({ _token: tokenMatch[1], username: 'foodietwinzz' }),
+              });
+              if (!apiRes.ok) { console.log('API fetch failed:', apiRes.status); process.exit(0); }
+              const data = await apiRes.json();
+              if (!data.success || !data.followers) { console.log('No data:', JSON.stringify(data)); process.exit(0); }
+              const followers = data.followers;
+              let formatted;
+              if (followers >= 1000000) formatted = (followers / 1000000).toFixed(1) + 'M';
+              else if (followers >= 10000) formatted = (followers / 1000).toFixed(1) + 'K';
+              else formatted = followers.toLocaleString();
+              const result = JSON.stringify({ followers, formatted, lastUpdated: new Date().toISOString(), source: 'blastup' });
+              require('fs').writeFileSync('public/followers.json', result);
+              console.log('Updated:', result);
+            } catch (e) { console.log('Error:', e.message); process.exit(0); }
+          }
+          main();
+          "
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/followers.json
+          git diff --staged --quiet || (git commit -m "update follower count" && git push)
