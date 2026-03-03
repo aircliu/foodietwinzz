@@ -52,14 +52,23 @@ export default async function handler(request) {
       );
     }
 
-    // Grab cookies
-    const cookieHeader = pageRes.headers.get("set-cookie") || "";
-    // Edge runtime returns set-cookie as comma-separated, parse carefully
-    const cookies = cookieHeader
-      .split(/,(?=\s*\w+=)/)
-      .map((c) => c.trim().split(";")[0])
-      .filter(Boolean)
-      .join("; ");
+    // Grab cookies — Edge runtime merges set-cookie into one header
+    let cookies = "";
+    if (pageRes.headers.getSetCookie) {
+      // Modern API: returns array of individual set-cookie values
+      cookies = pageRes.headers
+        .getSetCookie()
+        .map((c) => c.split(";")[0])
+        .join("; ");
+    } else {
+      // Fallback: parse the merged comma-separated header
+      const raw = pageRes.headers.get("set-cookie") || "";
+      cookies = raw
+        .split(/,(?=\s*(?:XSRF|_session|laravel))/)
+        .map((c) => c.trim().split(";")[0])
+        .filter(Boolean)
+        .join("; ");
+    }
 
     // Step 2: POST for follower count
     const apiRes = await fetch("https://blastup.com/instagram-follower-count", {
@@ -92,7 +101,7 @@ export default async function handler(request) {
     if (!data.success || !data.followers) {
       console.log("BlastUp API returned:", JSON.stringify(data));
       return new Response(
-        JSON.stringify({ followers: null, error: "api_no_data" }),
+        JSON.stringify({ followers: null, error: "api_no_data", debug: data }),
         { headers }
       );
     }
