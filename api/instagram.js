@@ -1,133 +1,123 @@
-// Vercel Serverless Function — /api/instagram
-// Fetches LIVE follower count. No hardcoded fallbacks.
-// Strategy 1: Instagram public page (works from cloud IPs via bot UA)
-// Strategy 2: BlastUp API fallback (works from residential IPs)
+// Vercel Edge Function — /api/instagram
+// Scrapes LIVE follower count from blastup.com. No hardcoded fallbacks.
 
-async function fetchFromInstagram() {
-  const res = await fetch("https://www.instagram.com/foodietwinzz/", {
-    headers: {
-      "User-Agent": "facebookexternalhit/1.1",
-      Accept: "text/html",
-    },
-  });
+export const config = { runtime: "edge" };
 
-  if (!res.ok) return null;
-
-  const html = await res.text();
-
-  // Parse follower count from og:description meta tag
-  // Format: "1,059 Followers, 1 Following, 2 Posts - ..."
-  const match = html.match(/content="([\d,.]+[KMkm]?)\s*Followers?/i);
-  if (!match) {
-    console.log("Instagram: no follower match. Preview:", html.substring(0, 1500));
-    return null;
-  }
-
-  let raw = match[1].replace(/,/g, "");
-
-  // Handle K/M suffixes
-  if (/k/i.test(raw)) {
-    return Math.round(parseFloat(raw) * 1000);
-  }
-  if (/m/i.test(raw)) {
-    return Math.round(parseFloat(raw) * 1000000);
-  }
-
-  const num = parseInt(raw, 10);
-  return num > 0 && num < 1000000000 ? num : null;
-}
-
-async function fetchFromBlastUp() {
-  // Step 1: GET page for CSRF token + cookies
-  const pageRes = await fetch(
-    "https://blastup.com/instagram-follower-count?foodietwinzz",
-    {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-        Accept: "text/html,application/xhtml+xml",
-      },
-    }
-  );
-
-  if (!pageRes.ok) return null;
-
-  const html = await pageRes.text();
-  const tokenMatch = html.match(/token:\s*"([^"]+)"/);
-  if (!tokenMatch) return null;
-
-  const rawCookies = pageRes.headers.getSetCookie
-    ? pageRes.headers.getSetCookie()
-    : [];
-  const cookies = rawCookies.map((c) => c.split(";")[0]).join("; ");
-
-  // Step 2: POST to API
-  const apiRes = await fetch("https://blastup.com/instagram-follower-count", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-      Referer: "https://blastup.com/instagram-follower-count?foodietwinzz",
-      Cookie: cookies,
-    },
-    body: JSON.stringify({
-      _token: tokenMatch[1],
-      username: "foodietwinzz",
-    }),
-  });
-
-  if (!apiRes.ok) return null;
-
-  const data = await apiRes.json();
-  return data.success && data.followers ? data.followers : null;
-}
-
-export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=30");
-  res.setHeader("Content-Type", "application/json");
+export default async function handler(request) {
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Cache-Control": "s-maxage=60, stale-while-revalidate=30",
+    "Content-Type": "application/json",
+  };
 
   try {
-    let followers = null;
-    let source = null;
-
-    // Strategy 1: Instagram direct (works from cloud IPs)
-    try {
-      followers = await fetchFromInstagram();
-      if (followers) source = "instagram";
-    } catch (e) {
-      console.log("Instagram fetch error:", e.message);
-    }
-
-    // Strategy 2: BlastUp fallback (works from residential IPs)
-    if (!followers) {
-      try {
-        followers = await fetchFromBlastUp();
-        if (followers) source = "blastup";
-      } catch (e) {
-        console.log("BlastUp fetch error:", e.message);
+    // Step 1: GET page for CSRF token + cookies
+    const pageRes = await fetch(
+      "https://blastup.com/instagram-follower-count?foodietwinzz",
+      {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+          Accept:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9",
+          "Accept-Encoding": "gzip, deflate, br",
+          "Sec-Fetch-Dest": "document",
+          "Sec-Fetch-Mode": "navigate",
+          "Sec-Fetch-Site": "none",
+          "Sec-Fetch-User": "?1",
+          "Upgrade-Insecure-Requests": "1",
+          Connection: "keep-alive",
+        },
       }
+    );
+
+    if (!pageRes.ok) {
+      console.log("BlastUp page status:", pageRes.status);
+      return new Response(
+        JSON.stringify({ followers: null, error: "page_fetch_failed", status: pageRes.status }),
+        { headers }
+      );
     }
 
-    if (!followers) {
-      return res.status(200).json({ followers: null, error: "all_sources_failed" });
+    const html = await pageRes.text();
+
+    // Extract CSRF token
+    const tokenMatch = html.match(/token:\s*"([^"]+)"/);
+    if (!tokenMatch) {
+      console.log("No CSRF token. HTML preview:", html.substring(0, 2000));
+      return new Response(
+        JSON.stringify({ followers: null, error: "no_token", htmlLen: html.length }),
+        { headers }
+      );
     }
 
-    // Format the number
+    // Grab cookies
+    const cookieHeader = pageRes.headers.get("set-cookie") || "";
+    // Edge runtime returns set-cookie as comma-separated, parse carefully
+    const cookies = cookieHeader
+      .split(/,(?=\s*\w+=)/)
+      .map((c) => c.trim().split(";")[0])
+      .filter(Boolean)
+      .join("; ");
+
+    // Step 2: POST for follower count
+    const apiRes = await fetch("https://blastup.com/instagram-follower-count", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        Referer: "https://blastup.com/instagram-follower-count?foodietwinzz",
+        Origin: "https://blastup.com",
+        Cookie: cookies,
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      body: JSON.stringify({
+        _token: tokenMatch[1],
+        username: "foodietwinzz",
+      }),
+    });
+
+    if (!apiRes.ok) {
+      console.log("BlastUp API status:", apiRes.status);
+      return new Response(
+        JSON.stringify({ followers: null, error: "api_fetch_failed", status: apiRes.status }),
+        { headers }
+      );
+    }
+
+    const data = await apiRes.json();
+
+    if (!data.success || !data.followers) {
+      console.log("BlastUp API returned:", JSON.stringify(data));
+      return new Response(
+        JSON.stringify({ followers: null, error: "api_no_data" }),
+        { headers }
+      );
+    }
+
+    const followers = data.followers;
+
     let formatted;
     if (followers >= 1000000) formatted = (followers / 1000000).toFixed(1) + "M";
     else if (followers >= 10000) formatted = (followers / 1000).toFixed(1) + "K";
     else formatted = followers.toLocaleString();
 
-    return res.status(200).json({
-      followers,
-      formatted,
-      lastUpdated: new Date().toISOString(),
-      source,
-    });
+    return new Response(
+      JSON.stringify({
+        followers,
+        formatted,
+        lastUpdated: new Date().toISOString(),
+        source: "blastup",
+      }),
+      { headers }
+    );
   } catch (error) {
     console.log("Handler error:", error.message);
-    return res.status(200).json({ followers: null, error: error.message });
+    return new Response(
+      JSON.stringify({ followers: null, error: error.message }),
+      { headers }
+    );
   }
 }
