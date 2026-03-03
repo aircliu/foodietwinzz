@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import heroImg from "../assets/hero.png";
+import FollowerCounter from "../components/FollowerCounter";
 
 function useReveal(threshold = 0.15) {
   const ref = useRef(null);
@@ -35,7 +36,6 @@ export default function Home() {
   const [heroLoaded, setHeroLoaded] = useState(false);
   const [featRef, featVis] = useReveal(0.15);
   const [ctaRef, ctaVis] = useReveal(0.15);
-  const [spotHover, setSpotHover] = useState(false);
 
   useEffect(() => { setHeroLoaded(true); }, []);
 
@@ -161,84 +161,59 @@ export default function Home() {
         <style>{`@keyframes heroChevronBounce { 0%,100%{ transform: translateX(-50%) translateY(0); } 50%{ transform: translateX(-50%) translateY(8px); } }`}</style>
       </section>
 
-      {/* ===== FEATURED SPOT ===== */}
+      {/* ===== FOLLOWER COUNTER ===== */}
+      <section style={{ padding: "80px 0 0" }}>
+        <FollowerCounter />
+      </section>
+
+      {/* ===== DAY COUNTER ===== */}
       <section ref={featRef} style={{ padding: "100px 20px", maxWidth: 1000, margin: "0 auto" }}>
         <div style={{
-          display: "flex", gap: 48, alignItems: "center", flexWrap: "wrap",
+          textAlign: "center",
           opacity: featVis ? 1 : 0, transform: featVis ? "translateY(0)" : "translateY(30px)",
           transition: "opacity 0.7s ease-out, transform 0.7s ease-out",
         }}>
-          {/* Left */}
-          <div style={{ flex: "1 1 320px", minWidth: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-              <span style={{
-                width: 8, height: 8, borderRadius: "50%", background: "var(--orange)",
-                animation: "featPulse 2s ease-in-out infinite", flexShrink: 0,
-              }} />
-              <span style={{
-                fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: 3,
-                color: "var(--orange)", textTransform: "uppercase",
-              }}>UP NEXT</span>
-            </div>
-            <h2 style={{
-              fontFamily: "var(--font-display)", fontSize: "clamp(36px, 6vw, 42px)",
-              color: "var(--cream)", margin: "0 0 12px", lineHeight: 1, letterSpacing: 1,
-            }}>TACOS LOS CHOLOS</h2>
-            <p style={{
-              fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--cream-muted)", margin: "0 0 18px",
-            }}>5,000 Followers — $50 Budget</p>
-            <p style={{
-              fontFamily: "var(--font-body)", fontSize: 16, lineHeight: 1.6,
-              color: "rgba(245,240,232,0.7)", margin: "0 0 28px",
-            }}>
-              LA Taco Madness Champions. Filet mignon tacos. The famous Cholo Pizza. This is the one.
-            </p>
-            <Link
-              to="/challenge"
-              style={{
-                fontFamily: "var(--font-display)", fontSize: 14, letterSpacing: 2,
-                color: "var(--orange)", textDecoration: "none",
-                transition: "text-underline-offset 0.2s",
-              }}
-              onMouseEnter={e => { e.currentTarget.style.textDecoration = "underline"; e.currentTarget.style.textUnderlineOffset = "6px"; }}
-              onMouseLeave={e => { e.currentTarget.style.textDecoration = "none"; }}
-            >VIEW ALL MILESTONES →</Link>
-          </div>
-
-          {/* Right — card */}
-          <div style={{ flex: "1 1 400px", minWidth: 0 }}>
-            <div
-              onMouseEnter={() => setSpotHover(true)}
-              onMouseLeave={() => setSpotHover(false)}
-              style={{
-                aspectRatio: "4/3", borderRadius: 16, background: "var(--surface)",
-                border: `1px solid ${spotHover ? "rgba(232,97,60,0.3)" : "var(--cream-dim)"}`,
-                overflow: "hidden", display: "flex", flexDirection: "column",
-                alignItems: "center", justifyContent: "center", position: "relative",
-                transition: "all 0.35s ease",
-                transform: spotHover ? "translateY(-4px)" : "translateY(0)",
-                boxShadow: spotHover ? "0 20px 40px rgba(0,0,0,0.3)" : "none",
-              }}
-            >
-              {/* Glow behind emoji */}
-              <div style={{
-                position: "absolute", width: 200, height: 200, borderRadius: "50%",
-                background: "radial-gradient(circle, rgba(232,97,60,0.12) 0%, transparent 70%)",
-                pointerEvents: "none",
-              }} />
-              <span style={{ fontSize: 80, position: "relative", zIndex: 1 }}>🌮</span>
-              <p style={{
-                fontFamily: "var(--font-display)", fontSize: 28, color: "var(--cream)",
-                margin: "16px 0 4px", letterSpacing: 1, position: "relative", zIndex: 1,
-              }}>TACOS LOS CHOLOS</p>
-              <p style={{
-                fontFamily: "var(--font-mono)", fontSize: 14, color: "var(--orange)",
-                margin: 0, position: "relative", zIndex: 1,
-              }}>$50 BUDGET</p>
-            </div>
-          </div>
+          <span style={{
+            fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: 3,
+            color: "var(--orange)", textTransform: "uppercase",
+            display: "inline-flex", alignItems: "center", gap: 10,
+          }}>
+            <span style={{
+              width: 8, height: 8, borderRadius: "50%", background: "var(--orange)",
+              animation: "dayPulse 2s ease-in-out infinite", display: "inline-block",
+            }} />
+            LIVE CHALLENGE
+          </span>
+          <h2 style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(48px, 12vw, 100px)",
+            color: "var(--cream)",
+            margin: "16px 0 8px",
+            lineHeight: 1,
+            letterSpacing: 2,
+          }}>
+            WHO'S READY FOR DAY {Math.max(1, Math.floor((Date.now() - new Date("2026-02-28T00:00:00").getTime()) / 86400000))}
+          </h2>
+          <p style={{
+            fontFamily: "var(--font-body)", fontSize: 17, lineHeight: 1.6,
+            color: "var(--cream-muted)", maxWidth: 480, margin: "0 auto 32px",
+          }}>
+            $1 for every 100 followers. A new restaurant every milestone. Follow the journey.
+          </p>
+          <Link
+            to="/challenge"
+            style={{
+              display: "inline-block",
+              fontFamily: "var(--font-display)", fontSize: 15, letterSpacing: 2,
+              padding: "14px 32px", borderRadius: 8,
+              background: "var(--orange)", color: "var(--bg)",
+              textDecoration: "none", transition: "all 0.25s ease",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.filter = "brightness(1.1)"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(232,97,60,0.3)"; }}
+            onMouseLeave={e => { e.currentTarget.style.filter = ""; e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
+          >VIEW THE CHALLENGE</Link>
         </div>
-        <style>{`@keyframes featPulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }`}</style>
+        <style>{`@keyframes dayPulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }`}</style>
       </section>
 
       {/* ===== COMMUNITY CTA ===== */}
