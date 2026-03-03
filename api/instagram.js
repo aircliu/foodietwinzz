@@ -4,13 +4,10 @@
 
 export const config = { runtime: "edge" };
 
-const CACHE_URL =
-  "https://raw.githubusercontent.com/aircliu/foodietwinzz/main/public/followers.json";
-
-async function fetchCached() {
-  const res = await fetch(CACHE_URL, {
-    headers: { "Cache-Control": "no-cache" },
-  });
+async function fetchCached(requestUrl) {
+  // Read the static followers.json from the same deployment
+  const url = new URL("/followers.json", requestUrl);
+  const res = await fetch(url.href);
   if (!res.ok) return null;
   const data = await res.json();
   return data.followers ? data : null;
@@ -91,8 +88,8 @@ export default async function handler(request) {
       }
     } catch {}
 
-    // Fall back to GitHub-cached value (updated every 10 min by Actions)
-    result = await fetchCached();
+    // Fall back to cached value in public/followers.json (updated by GitHub Actions)
+    result = await fetchCached(request.url);
     if (result) {
       headers["Cache-Control"] = "s-maxage=60, stale-while-revalidate=600";
       return new Response(JSON.stringify(result), { headers });
