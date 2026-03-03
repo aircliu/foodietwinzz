@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 const MILESTONES = [4000, 5000, 6000, 7000, 8000, 9000, 10000];
-const FALLBACK = 4200;
+const FALLBACK = 4650;
+const REFRESH_MS = 2 * 60 * 1000; // 2 minutes
 
 function getNextMilestone(count) {
   for (const m of MILESTONES) {
@@ -20,18 +21,20 @@ function getPrevMilestone(count) {
 }
 
 function AnimatedNumber({ value, duration = 1800 }) {
-  const [display, setDisplay] = useState(0);
+  const [display, setDisplay] = useState(value);
+  const prevRef = useRef(value);
   const rafRef = useRef(null);
 
   useEffect(() => {
-    const start = performance.now();
-    const from = 0;
+    const from = prevRef.current;
     const to = value;
+    prevRef.current = value;
+    if (from === to) return;
 
+    const start = performance.now();
     function tick(now) {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
-      // ease-out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       setDisplay(Math.round(from + (to - from) * eased));
       if (progress < 1) rafRef.current = requestAnimationFrame(tick);
@@ -44,24 +47,50 @@ function AnimatedNumber({ value, duration = 1800 }) {
   return <>{display.toLocaleString()}</>;
 }
 
+function formatCountdown(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
 export default function FollowerCounter() {
   const [followers, setFollowers] = useState(null);
   const [visible, setVisible] = useState(false);
+  const [countdown, setCountdown] = useState(120);
+  const [flash, setFlash] = useState(false);
   const ref = useRef(null);
+  const initialLoad = useRef(true);
 
-  useEffect(() => {
-    const fetchCount = () =>
-      fetch("/api/followers")
-        .then((r) => r.json())
-        .then((d) => setFollowers(d.followers))
-        .catch(() => setFollowers(FALLBACK));
-
-    fetchCount();
-    // Re-check every 10 minutes for users who keep the tab open
-    const interval = setInterval(fetchCount, 10 * 60 * 1000);
-    return () => clearInterval(interval);
+  const fetchCount = useCallback(() => {
+    fetch("/api/followers")
+      .then((r) => r.json())
+      .then((d) => {
+        setFollowers((prev) => {
+          // Flash green on any refresh (so user sees it updated)
+          setFlash(true);
+          setTimeout(() => setFlash(false), 1200);
+          return d.followers;
+        });
+      })
+      .catch(() => setFollowers(FALLBACK));
   }, []);
 
+  // Single timer: counts down every second, fetches at zero
+  useEffect(() => {
+    fetchCount(); // initial load
+    const timer = setInterval(() => {
+      setCountdown((c) => {
+        if (c <= 1) {
+          fetchCount();
+          return 120;
+        }
+        return c - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [fetchCount]);
+
+  // Intersection observer for initial reveal
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -94,11 +123,12 @@ export default function FollowerCounter() {
     >
       <div style={{
         background: "var(--surface)",
-        border: "1px solid var(--cream-dim)",
+        border: `1px solid ${flash ? "var(--green)" : "var(--cream-dim)"}`,
         borderRadius: 20,
         padding: "36px 32px 32px",
         position: "relative",
         overflow: "hidden",
+        transition: "border-color 0.4s ease",
       }}>
         {/* Subtle glow */}
         <div style={{
@@ -162,16 +192,46 @@ export default function FollowerCounter() {
         <div style={{
           fontFamily: "var(--font-display)",
           fontSize: "clamp(56px, 12vw, 80px)",
-          color: "var(--cream)",
+          color: flash ? "var(--green)" : "var(--cream)",
           lineHeight: 1,
           letterSpacing: 2,
           marginBottom: 4,
+          transition: "color 0.4s ease",
         }}>
           {visible ? <AnimatedNumber value={count} /> : "0"}
         </div>
 
+        {/* Countdown timer */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginTop: 8,
+          marginBottom: 16,
+        }}>
+          <span style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 11,
+            color: "var(--cream-dim)",
+            letterSpacing: 1,
+          }}>
+            Next update in
+          </span>
+          <span style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 12,
+            fontWeight: 700,
+            color: countdown <= 10 ? "var(--orange)" : "var(--cream-muted)",
+            letterSpacing: 1,
+            minWidth: 36,
+            transition: "color 0.3s ease",
+          }}>
+            {formatCountdown(countdown)}
+          </span>
+        </div>
+
         {/* Progress bar */}
-        <div style={{ marginTop: 20, marginBottom: 12 }}>
+        <div style={{ marginBottom: 12 }}>
           <div style={{
             display: "flex",
             justifyContent: "space-between",
