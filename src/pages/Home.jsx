@@ -31,19 +31,11 @@ function FadeIn({ children, style, delay = 0, visible }) {
   );
 }
 
-const products = [
-  { emoji: "🥢", name: "Signature Chopsticks", price: "$18", tag: "BEST SELLER", tagColor: "var(--orange)" },
-  { emoji: "✨", name: "Premium Metal Set", price: "$32", tag: "LIMITED", tagColor: "var(--gold)" },
-  { emoji: "🍜", name: "Ramen Bowl Set", price: "$45", tag: "NEW", tagColor: "var(--green)" },
-];
-
 export default function Home() {
   const [heroLoaded, setHeroLoaded] = useState(false);
   const [featRef, featVis] = useReveal(0.15);
-  const [merchRef, merchVis] = useReveal(0.1);
   const [ctaRef, ctaVis] = useReveal(0.15);
   const [spotHover, setSpotHover] = useState(false);
-  const [hoveredCard, setHoveredCard] = useState(null);
 
   useEffect(() => { setHeroLoaded(true); }, []);
 
@@ -136,19 +128,21 @@ export default function Home() {
                 onMouseEnter={e => { e.currentTarget.style.filter = "brightness(1.1)"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(232,97,60,0.3)"; }}
                 onMouseLeave={e => { e.currentTarget.style.filter = ""; e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
               >WATCH ON TIKTOK</a>
-              <Link
-                to="/shop"
-                className="hero-btn-outline"
+              <a
+                href="https://www.instagram.com/foodietwinzz/"
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
-                  border: "1px solid var(--gold)", color: "var(--gold)",
+                  background: "linear-gradient(135deg, #833AB4, #E1306C, #F77737)",
+                  color: "#fff",
                   fontFamily: "var(--font-display)", fontSize: 15, letterSpacing: 2,
                   padding: "14px 32px", borderRadius: 8, textDecoration: "none",
-                  background: "transparent", cursor: "pointer", display: "inline-block",
+                  border: "none", cursor: "pointer", display: "inline-block",
                   transition: "all 0.25s ease",
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = "var(--gold)"; e.currentTarget.style.color = "var(--bg)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--gold)"; e.currentTarget.style.transform = ""; }}
-              >SHOP MERCH</Link>
+                onMouseEnter={e => { e.currentTarget.style.filter = "brightness(1.15)"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(225,48,108,0.3)"; }}
+                onMouseLeave={e => { e.currentTarget.style.filter = ""; e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
+              >FOLLOW ON INSTAGRAM</a>
             </div>
           </FadeIn>
         </div>
@@ -245,86 +239,6 @@ export default function Home() {
           </div>
         </div>
         <style>{`@keyframes featPulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }`}</style>
-      </section>
-
-      {/* ===== MERCH TEASER ===== */}
-      <section ref={merchRef} style={{ padding: "100px 20px", background: "var(--surface)" }}>
-        <div style={{
-          maxWidth: 1200, margin: "0 auto",
-          opacity: merchVis ? 1 : 0, transform: merchVis ? "translateY(0)" : "translateY(30px)",
-          transition: "opacity 0.7s ease-out, transform 0.7s ease-out",
-        }}>
-          {/* Label with lines */}
-          <div style={{
-            display: "flex", alignItems: "center", justifyContent: "center",
-            gap: 20, marginBottom: 12,
-          }}>
-            <div style={{ flex: "0 1 60px", height: 1, background: "var(--gold)", opacity: 0.3 }} />
-            <span style={{
-              fontFamily: "var(--font-display)", fontSize: 14, letterSpacing: 4,
-              color: "var(--gold)",
-            }}>THE SHOP</span>
-            <div style={{ flex: "0 1 60px", height: 1, background: "var(--gold)", opacity: 0.3 }} />
-          </div>
-
-          <h2 style={{
-            fontFamily: "var(--font-display)", fontSize: "clamp(40px, 7vw, 64px)",
-            color: "var(--cream)", textAlign: "center", margin: "0 0 48px",
-            lineHeight: 1, letterSpacing: 2,
-          }}>EAT IN STYLE</h2>
-
-          {/* Product grid */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: 20,
-          }}>
-            {products.map((p, i) => (
-              <div
-                key={i}
-                onMouseEnter={() => setHoveredCard(i)}
-                onMouseLeave={() => setHoveredCard(null)}
-                style={{
-                  background: "var(--surface-2)", borderRadius: 12,
-                  border: `1px solid ${hoveredCard === i ? "rgba(212,168,83,0.3)" : "var(--cream-dim)"}`,
-                  padding: "40px 28px", textAlign: "center",
-                  transition: "all 0.3s ease",
-                  transform: hoveredCard === i ? "translateY(-6px)" : "translateY(0)",
-                  boxShadow: hoveredCard === i ? "0 16px 40px rgba(0,0,0,0.25)" : "none",
-                }}
-              >
-                <div style={{ fontSize: 56, marginBottom: 20 }}>{p.emoji}</div>
-                <span style={{
-                  display: "inline-block",
-                  fontFamily: "var(--font-display)", fontSize: 11, letterSpacing: 2,
-                  padding: "4px 14px", borderRadius: 20, marginBottom: 16,
-                  background: p.tagColor, color: "var(--bg)",
-                }}>{p.tag}</span>
-                <h3 style={{
-                  fontFamily: "var(--font-body)", fontSize: 18, fontWeight: 600,
-                  color: "var(--cream)", margin: "0 0 8px",
-                }}>{p.name}</h3>
-                <p style={{
-                  fontFamily: "var(--font-mono)", fontSize: 16, color: "var(--gold)", margin: 0,
-                }}>{p.price}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Browse link */}
-          <div style={{ textAlign: "center", marginTop: 40 }}>
-            <Link
-              to="/shop"
-              style={{
-                fontFamily: "var(--font-display)", fontSize: 15, letterSpacing: 2,
-                color: "var(--gold)", textDecoration: "none",
-                transition: "text-underline-offset 0.2s",
-              }}
-              onMouseEnter={e => { e.currentTarget.style.textDecoration = "underline"; e.currentTarget.style.textUnderlineOffset = "6px"; }}
-              onMouseLeave={e => { e.currentTarget.style.textDecoration = "none"; }}
-            >BROWSE ALL MERCH →</Link>
-          </div>
-        </div>
       </section>
 
       {/* ===== COMMUNITY CTA ===== */}

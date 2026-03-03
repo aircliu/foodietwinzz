@@ -139,16 +139,55 @@ export default function Contact() {
           }}>
             Want us to feature your spot? Let's work together.
           </p>
-          <p style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 12,
-            color: "var(--gold)",
-            letterSpacing: 0.5,
-            margin: 0,
-          }}>
-            Featured 7+ Anaheim restaurants · 335K+ TikTok likes · Michelin Bib Gourmand coverage
-          </p>
         </div>
+      </div>
+
+      {/* Instagram DM Banner */}
+      <div style={{
+        maxWidth: 900,
+        margin: "0 auto 32px",
+        padding: "0 20px",
+      }}>
+        <a
+          href="https://www.instagram.com/foodietwinzz/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 14,
+            padding: "20px 28px",
+            borderRadius: 14,
+            background: "linear-gradient(135deg, rgba(232,97,60,0.08), rgba(212,168,83,0.08))",
+            border: "1px solid rgba(232,97,60,0.25)",
+            textDecoration: "none",
+            transition: "all 0.3s ease",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--orange)"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(232,97,60,0.15)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(232,97,60,0.25)"; e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
+        >
+          <span style={{ fontSize: 28 }}>📩</span>
+          <div style={{ textAlign: "left" }}>
+            <p style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(16px, 3vw, 20px)",
+              color: "var(--cream)",
+              letterSpacing: 2,
+              margin: "0 0 4px",
+            }}>
+              FASTEST WAY TO REACH US — DM ON INSTAGRAM
+            </p>
+            <p style={{
+              fontFamily: "var(--font-body)",
+              fontSize: 14,
+              color: "var(--orange)",
+              margin: 0,
+            }}>
+              @foodietwinzz
+            </p>
+          </div>
+        </a>
       </div>
 
       {/* Two-column layout */}
@@ -534,7 +573,7 @@ export default function Contact() {
               📱 @foodietwinzz on TikTok
             </a>
             <a
-              href="mailto:foodietwinzz@gmail.com"
+              href="mailto:foodietwinzz@sanguinemgmt.biz"
               style={{
                 display: "block",
                 fontFamily: "var(--font-body)",
@@ -546,7 +585,7 @@ export default function Contact() {
               onMouseEnter={(e) => { e.currentTarget.style.textDecoration = "underline"; }}
               onMouseLeave={(e) => { e.currentTarget.style.textDecoration = "none"; }}
             >
-              📧 foodietwinzz@gmail.com
+              📧 foodietwinzz@sanguinemgmt.biz
             </a>
           </div>
         </div>

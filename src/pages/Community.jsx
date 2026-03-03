@@ -1,13 +1,5 @@
 import { useState } from "react";
 
-const WALL_DATA = [
-  { spot: "Boba Time", reason: "Their brown sugar boba is literally life-changing. The pearls are always fresh.", tiktok: "@bobaaddict99" },
-  { spot: "Kura Revolving Sushi", reason: "Conveyor belt sushi for $3 a plate?! Perfect budget challenge spot.", tiktok: "@sushilover" },
-  { spot: "Portal Cafe", reason: "Anime-themed cafe with insane latte art. The katsu sandwich is fire.", tiktok: null },
-  { spot: "The Halal Guys", reason: "Their white sauce hits different at 2am. Under $15 easy.", tiktok: "@halalgang" },
-  { spot: "Sushi Damu", reason: "Hidden gem omakase that nobody talks about. Way under market price.", tiktok: "@foodie.finds" },
-  { spot: "85°C Bakery", reason: "Sea salt coffee + egg tarts for under $8. Ultimate cheap date spot.", tiktok: null },
-];
 
 const shakeKeyframes = `
 @keyframes shake {
@@ -58,7 +50,6 @@ const labelBase = {
 };
 
 export default function Community() {
-  const [tab, setTab] = useState("suggest");
   const [form, setForm] = useState({ name: "", why: "", tiktok: "" });
   const [errors, setErrors] = useState({});
   const [shaking, setShaking] = useState({});
@@ -126,36 +117,7 @@ export default function Community() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 48, padding: "0 20px" }}>
-        {[
-          { key: "suggest", label: "SUGGEST" },
-          { key: "wall", label: "WALL OF FAME" },
-        ].map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: 15,
-              letterSpacing: 2,
-              padding: "10px 24px",
-              borderRadius: 8,
-              border: "none",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-              background: tab === t.key ? "var(--orange)" : "transparent",
-              color: tab === t.key ? "var(--bg)" : "var(--cream-muted)",
-            }}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab Content */}
-      {tab === "suggest" ? (
-        <div style={{ maxWidth: 560, margin: "0 auto", padding: "0 20px 80px" }}>
+      <div style={{ maxWidth: 560, margin: "0 auto", padding: "0 20px 80px" }}>
           <div style={{
             background: "var(--surface)",
             border: "1px solid var(--cream-dim)",
@@ -333,67 +295,6 @@ export default function Community() {
             )}
           </div>
         </div>
-      ) : (
-        /* Wall of Fame */
-        <div style={{ maxWidth: 700, margin: "0 auto", padding: "0 20px 80px" }}>
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-            gap: 16,
-          }}>
-            {WALL_DATA.map((item, i) => (
-              <div
-                key={i}
-                style={{
-                  background: "var(--surface)",
-                  border: "1px solid var(--cream-dim)",
-                  borderRadius: 12,
-                  padding: 24,
-                  animation: `fadeUp 0.4s ease-out ${i * 0.08}s both`,
-                }}
-              >
-                <p style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 10,
-                  letterSpacing: 2,
-                  textTransform: "uppercase",
-                  color: "var(--cream-muted)",
-                  margin: "0 0 12px",
-                }}>
-                  COMMUNITY PICK
-                </p>
-                <p style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: 17,
-                  fontWeight: 700,
-                  color: "var(--cream)",
-                  margin: "0 0 8px",
-                }}>
-                  {item.spot}
-                </p>
-                <p style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: 14,
-                  color: "rgba(245,240,232,0.6)",
-                  margin: "0 0 16px",
-                  lineHeight: 1.5,
-                  fontStyle: "italic",
-                }}>
-                  "{item.reason}"
-                </p>
-                <p style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 12,
-                  color: item.tiktok ? "var(--orange)" : "var(--cream-muted)",
-                  margin: 0,
-                }}>
-                  {item.tiktok || "Anonymous foodie"}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
