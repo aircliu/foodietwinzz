@@ -39,7 +39,7 @@ export default function Shop() {
           fontFamily: "var(--font-display)",
           fontSize: "clamp(48px, 10vw, 80px)",
           color: "var(--cream)",
-          letterSpacing: 4,
+          letterSpacing: 3,
           lineHeight: 1,
           margin: "0 0 16px",
         }}>
@@ -73,8 +73,9 @@ export default function Shop() {
           rel="noopener noreferrer"
           style={{
             display: "inline-block",
-            fontFamily: "var(--font-display)",
-            fontSize: 15,
+            fontFamily: "var(--font-heading)",
+            fontSize: 14,
+            fontWeight: 700,
             letterSpacing: 2,
             padding: "14px 36px",
             borderRadius: 8,
@@ -83,6 +84,7 @@ export default function Shop() {
             background: "transparent",
             textDecoration: "none",
             transition: "all 0.3s ease",
+            textTransform: "uppercase",
           }}
           onMouseEnter={e => { e.currentTarget.style.background = "var(--gold)"; e.currentTarget.style.color = "var(--bg)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
           onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--gold)"; e.currentTarget.style.transform = ""; }}

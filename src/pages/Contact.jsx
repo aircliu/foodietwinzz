@@ -21,7 +21,7 @@ const inputBase = {
   padding: "14px 16px",
   borderRadius: 10,
   border: "1px solid var(--cream-dim)",
-  background: "var(--bg)",
+  background: "var(--surface)",
   color: "var(--cream)",
   fontSize: 15,
   fontFamily: "var(--font-body)",
@@ -36,7 +36,7 @@ const inputFocusGold = {
 };
 
 const inputError = {
-  borderColor: "#ff4444",
+  borderColor: "var(--red)",
 };
 
 const labelBase = {
@@ -51,7 +51,7 @@ const labelBase = {
 };
 
 const infoCardBase = {
-  background: "var(--surface)",
+  background: "var(--surface-2)",
   border: "1px solid var(--cream-dim)",
   borderRadius: 12,
   padding: 28,
@@ -101,7 +101,6 @@ export default function Contact() {
       setTimeout(() => setShaking({}), 500);
       return;
     }
-    // TODO: connect to Formspree, email API, or Google Forms
     console.log("Restaurant Inquiry Submitted:", form);
     setSubmitted(true);
   };
@@ -117,13 +116,20 @@ export default function Contact() {
       <style>{shakeKeyframes}</style>
 
       {/* Header */}
-      <div style={{ paddingTop: 120, paddingBottom: 40, paddingLeft: 20, paddingRight: 20, textAlign: "center" }}>
+      <div style={{ paddingTop: 120, paddingBottom: 40, paddingLeft: "clamp(20px, 5vw, 60px)", paddingRight: "clamp(20px, 5vw, 60px)" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+            <div style={{ width: 40, height: 1, background: "var(--gold)" }} />
+            <span style={{
+              fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: 3,
+              color: "var(--gold)",
+            }}>PARTNERSHIPS</span>
+          </div>
           <h1 style={{
             fontFamily: "var(--font-display)",
             fontSize: "clamp(48px, 8vw, 72px)",
             color: "var(--cream)",
-            letterSpacing: 4,
+            letterSpacing: 3,
             lineHeight: 1,
             margin: "0 0 16px",
           }}>
@@ -132,9 +138,8 @@ export default function Contact() {
           <p style={{
             fontFamily: "var(--font-body)",
             fontSize: 17,
-            color: "rgba(245,240,232,0.6)",
+            color: "var(--cream-muted)",
             maxWidth: 560,
-            margin: "0 auto 16px",
             lineHeight: 1.6,
           }}>
             Want us to feature your spot? Let's work together.
@@ -146,7 +151,7 @@ export default function Contact() {
       <div style={{
         maxWidth: 900,
         margin: "0 auto 32px",
-        padding: "0 20px",
+        padding: "0 clamp(20px, 5vw, 60px)",
       }}>
         <a
           href="https://www.instagram.com/foodietwinzz/"
@@ -159,28 +164,29 @@ export default function Contact() {
             gap: 14,
             padding: "20px 28px",
             borderRadius: 14,
-            background: "linear-gradient(135deg, rgba(232,97,60,0.08), rgba(212,168,83,0.08))",
-            border: "1px solid rgba(232,97,60,0.25)",
+            background: "linear-gradient(135deg, rgba(255,92,53,0.06), rgba(232,184,75,0.06))",
+            border: "1px solid rgba(255,92,53,0.2)",
             textDecoration: "none",
             transition: "all 0.3s ease",
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--orange)"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(232,97,60,0.15)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(232,97,60,0.25)"; e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--orange)"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(255,92,53,0.1)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,92,53,0.2)"; e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
         >
           <span style={{ fontSize: 28 }}>📩</span>
           <div style={{ textAlign: "left" }}>
             <p style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(16px, 3vw, 20px)",
+              fontFamily: "var(--font-heading)",
+              fontSize: "clamp(14px, 2.5vw, 18px)",
+              fontWeight: 700,
               color: "var(--cream)",
-              letterSpacing: 2,
+              letterSpacing: 1,
               margin: "0 0 4px",
             }}>
               FASTEST WAY TO REACH US — DM ON INSTAGRAM
             </p>
             <p style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 14,
+              fontFamily: "var(--font-mono)",
+              fontSize: 13,
               color: "var(--orange)",
               margin: 0,
             }}>
@@ -194,7 +200,7 @@ export default function Contact() {
       <div style={{
         maxWidth: 900,
         margin: "0 auto",
-        padding: "0 20px 80px",
+        padding: "0 clamp(20px, 5vw, 60px) 80px",
         display: "flex",
         gap: 48,
         flexWrap: "wrap",
@@ -202,10 +208,10 @@ export default function Contact() {
         {/* Left: Form */}
         <div style={{ flex: "1 1 480px", minWidth: 0 }}>
           <div style={{
-            background: "var(--surface)",
-            border: "1px solid rgba(212,168,83,0.12)",
+            background: "var(--surface-2)",
+            border: "1px solid rgba(232,184,75,0.12)",
             borderRadius: 16,
-            padding: "40px 32px",
+            padding: "clamp(28px, 5vw, 40px) clamp(20px, 4vw, 32px)",
           }}>
             {submitted ? (
               <div style={{ textAlign: "center", animation: "fadeUp 0.4s ease-out" }}>
@@ -230,8 +236,9 @@ export default function Contact() {
                 <button
                   onClick={reset}
                   style={{
-                    fontFamily: "var(--font-display)",
+                    fontFamily: "var(--font-heading)",
                     fontSize: 14,
+                    fontWeight: 700,
                     letterSpacing: 2,
                     padding: "12px 28px",
                     borderRadius: 10,
@@ -240,6 +247,7 @@ export default function Contact() {
                     color: "var(--gold)",
                     cursor: "pointer",
                     transition: "all 0.2s ease",
+                    textTransform: "uppercase",
                   }}
                   onMouseEnter={(e) => { e.currentTarget.style.background = "var(--gold-glow)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
@@ -249,7 +257,6 @@ export default function Contact() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-                {/* Restaurant Name */}
                 <div style={{ animation: shaking.restaurantName ? "shake 0.4s ease" : "none" }}>
                   <label style={labelBase}>
                     RESTAURANT NAME <span style={{ color: "var(--orange)" }}>*</span>
@@ -267,10 +274,9 @@ export default function Contact() {
                       ...(errors.restaurantName ? inputError : {}),
                     }}
                   />
-                  {errors.restaurantName && <p style={{ fontSize: 12, color: "#ff4444", marginTop: 6, fontWeight: 500 }}>{errors.restaurantName}</p>}
+                  {errors.restaurantName && <p style={{ fontSize: 12, color: "var(--red)", marginTop: 6, fontWeight: 500 }}>{errors.restaurantName}</p>}
                 </div>
 
-                {/* Contact Name */}
                 <div style={{ animation: shaking.contactName ? "shake 0.4s ease" : "none" }}>
                   <label style={labelBase}>
                     CONTACT NAME <span style={{ color: "var(--orange)" }}>*</span>
@@ -288,10 +294,9 @@ export default function Contact() {
                       ...(errors.contactName ? inputError : {}),
                     }}
                   />
-                  {errors.contactName && <p style={{ fontSize: 12, color: "#ff4444", marginTop: 6, fontWeight: 500 }}>{errors.contactName}</p>}
+                  {errors.contactName && <p style={{ fontSize: 12, color: "var(--red)", marginTop: 6, fontWeight: 500 }}>{errors.contactName}</p>}
                 </div>
 
-                {/* Email + Phone row */}
                 <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                   <div style={{ flex: "1 1 200px", animation: shaking.email ? "shake 0.4s ease" : "none" }}>
                     <label style={labelBase}>
@@ -310,7 +315,7 @@ export default function Contact() {
                         ...(errors.email ? inputError : {}),
                       }}
                     />
-                    {errors.email && <p style={{ fontSize: 12, color: "#ff4444", marginTop: 6, fontWeight: 500 }}>{errors.email}</p>}
+                    {errors.email && <p style={{ fontSize: 12, color: "var(--red)", marginTop: 6, fontWeight: 500 }}>{errors.email}</p>}
                   </div>
                   <div style={{ flex: "1 1 200px" }}>
                     <label style={labelBase}>PHONE</label>
@@ -329,7 +334,6 @@ export default function Contact() {
                   </div>
                 </div>
 
-                {/* Looking For - Pills */}
                 <div style={{ animation: shaking.lookingFor ? "shake 0.4s ease" : "none" }}>
                   <label style={labelBase}>
                     WHAT ARE YOU LOOKING FOR? <span style={{ color: "var(--orange)" }}>*</span>
@@ -347,7 +351,7 @@ export default function Contact() {
                         style={{
                           padding: "12px 16px",
                           borderRadius: 8,
-                          border: `1px solid ${form.lookingFor === opt ? "var(--gold)" : errors.lookingFor ? "#ff4444" : "var(--cream-dim)"}`,
+                          border: `1px solid ${form.lookingFor === opt ? "var(--gold)" : errors.lookingFor ? "var(--red)" : "var(--cream-dim)"}`,
                           background: form.lookingFor === opt ? "var(--gold-glow)" : "transparent",
                           color: form.lookingFor === opt ? "var(--gold)" : "var(--cream-muted)",
                           fontFamily: "var(--font-body)",
@@ -361,17 +365,16 @@ export default function Contact() {
                           if (form.lookingFor !== opt) e.currentTarget.style.borderColor = "var(--gold)";
                         }}
                         onMouseLeave={(e) => {
-                          if (form.lookingFor !== opt) e.currentTarget.style.borderColor = errors.lookingFor ? "#ff4444" : "var(--cream-dim)";
+                          if (form.lookingFor !== opt) e.currentTarget.style.borderColor = errors.lookingFor ? "var(--red)" : "var(--cream-dim)";
                         }}
                       >
                         {opt}
                       </button>
                     ))}
                   </div>
-                  {errors.lookingFor && <p style={{ fontSize: 12, color: "#ff4444", marginTop: 6, fontWeight: 500 }}>{errors.lookingFor}</p>}
+                  {errors.lookingFor && <p style={{ fontSize: 12, color: "var(--red)", marginTop: 6, fontWeight: 500 }}>{errors.lookingFor}</p>}
                 </div>
 
-                {/* Message */}
                 <div>
                   <label style={labelBase}>MESSAGE</label>
                   <textarea
@@ -392,7 +395,7 @@ export default function Contact() {
                     <span style={{
                       fontFamily: "var(--font-mono)",
                       fontSize: 11,
-                      color: form.message.length >= 500 ? "#ff4444" : form.message.length > 400 ? "var(--gold)" : "var(--cream-dim)",
+                      color: form.message.length >= 500 ? "var(--red)" : form.message.length > 400 ? "var(--gold)" : "var(--cream-dim)",
                       transition: "color 0.2s",
                     }}>
                       {form.message.length}/500
@@ -400,7 +403,6 @@ export default function Contact() {
                   </div>
                 </div>
 
-                {/* Submit */}
                 <button
                   type="submit"
                   style={{
@@ -408,14 +410,15 @@ export default function Contact() {
                     padding: 16,
                     borderRadius: 10,
                     border: "none",
-                    background: "linear-gradient(135deg, #D4A853, #C9A84C)",
+                    background: "var(--gradient-gold)",
                     color: "var(--bg)",
-                    fontFamily: "var(--font-display)",
-                    fontSize: 16,
+                    fontFamily: "var(--font-heading)",
+                    fontSize: 15,
                     fontWeight: 700,
                     letterSpacing: 2,
                     cursor: "pointer",
                     transition: "all 0.2s ease",
+                    textTransform: "uppercase",
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.filter = "brightness(1.1)";
@@ -437,68 +440,42 @@ export default function Contact() {
 
         {/* Right: Info Cards */}
         <div style={{ flex: "1 1 320px", display: "flex", flexDirection: "column", gap: 16 }}>
-          {/* What We Offer */}
           <div
             style={{ ...infoCardBase, animation: "fadeUp 0.4s ease-out 0.1s both" }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = "rgba(245,240,232,0.25)"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = "rgba(242,237,228,0.25)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "var(--cream-dim)"; }}
           >
             <p style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              letterSpacing: 2,
-              textTransform: "uppercase",
-              color: "var(--cream-muted)",
-              margin: "0 0 20px",
-              fontWeight: 700,
-            }}>
-              WHAT WE OFFER
-            </p>
+              fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: 2,
+              textTransform: "uppercase", color: "var(--cream-muted)",
+              margin: "0 0 20px", fontWeight: 700,
+            }}>WHAT WE OFFER</p>
             {[
               { emoji: "📸", text: "Full TikTok + Instagram coverage" },
               { emoji: "🎬", text: "Professional food content creation" },
               { emoji: "📊", text: "Audience of 4,000+ local food lovers" },
             ].map((item, i) => (
-              <div key={i} style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                margin: "10px 0",
-              }}>
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, margin: "10px 0" }}>
                 <span style={{ fontSize: 20, flexShrink: 0 }}>{item.emoji}</span>
                 <span style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: 14,
-                  color: "rgba(245,240,232,0.7)",
-                }}>
-                  {item.text}
-                </span>
+                  fontFamily: "var(--font-body)", fontSize: 14,
+                  color: "rgba(242,237,228,0.7)",
+                }}>{item.text}</span>
               </div>
             ))}
           </div>
 
-          {/* Our Stats */}
           <div
             style={{ ...infoCardBase, animation: "fadeUp 0.4s ease-out 0.2s both" }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = "rgba(245,240,232,0.25)"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = "rgba(242,237,228,0.25)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "var(--cream-dim)"; }}
           >
             <p style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              letterSpacing: 2,
-              textTransform: "uppercase",
-              color: "var(--cream-muted)",
-              margin: "0 0 16px",
-              fontWeight: 700,
-            }}>
-              OUR STATS
-            </p>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 0,
-            }}>
+              fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: 2,
+              textTransform: "uppercase", color: "var(--cream-muted)",
+              margin: "0 0 16px", fontWeight: 700,
+            }}>OUR STATS</p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0 }}>
               {[
                 { num: "7+", label: "Restaurants" },
                 { num: "335K+", label: "TikTok Likes" },
@@ -507,86 +484,63 @@ export default function Contact() {
               ].map((stat, i) => (
                 <div key={i} style={{ textAlign: "center", padding: 16 }}>
                   <p style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: 28,
-                    color: "var(--cream)",
-                    margin: "0 0 4px",
-                    letterSpacing: 1,
-                  }}>
-                    {stat.num}
-                  </p>
+                    fontFamily: "var(--font-display)", fontSize: 28,
+                    color: "var(--cream)", margin: "0 0 4px", letterSpacing: 1,
+                  }}>{stat.num}</p>
                   <p style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 10,
-                    letterSpacing: 2,
-                    textTransform: "uppercase",
-                    color: "var(--cream-muted)",
-                    margin: 0,
-                  }}>
-                    {stat.label}
-                  </p>
+                    fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: 2,
+                    textTransform: "uppercase", color: "var(--cream-muted)", margin: 0,
+                  }}>{stat.label}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Quick Contact */}
           <div
             style={{ ...infoCardBase, animation: "fadeUp 0.4s ease-out 0.3s both" }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = "rgba(245,240,232,0.25)"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = "rgba(242,237,228,0.25)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "var(--cream-dim)"; }}
           >
             <p style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              letterSpacing: 2,
-              textTransform: "uppercase",
-              color: "var(--cream-muted)",
-              margin: "0 0 16px",
-              fontWeight: 700,
-            }}>
-              QUICK CONTACT
-            </p>
+              fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: 2,
+              textTransform: "uppercase", color: "var(--cream-muted)",
+              margin: "0 0 16px", fontWeight: 700,
+            }}>QUICK CONTACT</p>
             <p style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 14,
-              color: "var(--cream-muted)",
-              margin: "0 0 12px",
-            }}>
-              DM us directly:
-            </p>
+              fontFamily: "var(--font-body)", fontSize: 14,
+              color: "var(--cream-muted)", margin: "0 0 12px",
+            }}>DM us directly:</p>
+            <a
+              href="https://www.instagram.com/foodietwinzz/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "block", fontFamily: "var(--font-body)", fontSize: 14,
+                color: "var(--orange)", margin: "0 0 8px", transition: "text-decoration 0.2s",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.textDecoration = "underline"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.textDecoration = "none"; }}
+            >📱 @foodietwinzz on Instagram</a>
             <a
               href="https://www.tiktok.com/@foodietwinzz"
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                display: "block",
-                fontFamily: "var(--font-body)",
-                fontSize: 14,
-                color: "var(--orange)",
-                margin: "0 0 8px",
-                transition: "text-decoration 0.2s",
+                display: "block", fontFamily: "var(--font-body)", fontSize: 14,
+                color: "var(--orange)", margin: "0 0 8px", transition: "text-decoration 0.2s",
               }}
               onMouseEnter={(e) => { e.currentTarget.style.textDecoration = "underline"; }}
               onMouseLeave={(e) => { e.currentTarget.style.textDecoration = "none"; }}
-            >
-              📱 @foodietwinzz on TikTok
-            </a>
+            >📱 @foodietwinzz on TikTok</a>
             <a
               href="mailto:foodietwinzz@sanguinemgmt.biz"
               style={{
-                display: "block",
-                fontFamily: "var(--font-body)",
-                fontSize: 14,
-                color: "var(--gold)",
-                margin: 0,
-                transition: "text-decoration 0.2s",
+                display: "block", fontFamily: "var(--font-body)", fontSize: 14,
+                color: "var(--gold)", margin: 0, transition: "text-decoration 0.2s",
               }}
               onMouseEnter={(e) => { e.currentTarget.style.textDecoration = "underline"; }}
               onMouseLeave={(e) => { e.currentTarget.style.textDecoration = "none"; }}
-            >
-              📧 foodietwinzz@sanguinemgmt.biz
-            </a>
+            >📧 foodietwinzz@sanguinemgmt.biz</a>
           </div>
         </div>
       </div>

@@ -54,7 +54,7 @@ function Navbar() {
         .nav-link-active { color: var(--orange) !important; }
         .follow-btn:hover {
           background: var(--orange) !important;
-          color: var(--cream) !important;
+          color: var(--bg) !important;
           border-color: var(--orange) !important;
         }
         @media (max-width: 767px) {
@@ -79,16 +79,16 @@ function Navbar() {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "0 clamp(16px, 5vw, 48px)",
-        background: scrolled ? "rgba(5,5,5,0.9)" : "transparent",
-        backdropFilter: scrolled ? "blur(20px)" : "none",
-        WebkitBackdropFilter: scrolled ? "blur(20px)" : "none",
-        borderBottom: scrolled ? "1px solid rgba(245,240,232,0.06)" : "1px solid transparent",
+        background: scrolled ? "rgba(3,3,3,0.92)" : "transparent",
+        backdropFilter: scrolled ? "blur(24px) saturate(1.2)" : "none",
+        WebkitBackdropFilter: scrolled ? "blur(24px) saturate(1.2)" : "none",
+        borderBottom: scrolled ? "1px solid rgba(242,237,228,0.06)" : "1px solid transparent",
         transition: "all 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
       }}>
         {/* Logo */}
         <Link to="/" style={{
           fontFamily: "var(--font-display)",
-          fontSize: "clamp(18px, 4.5vw, 22px)",
+          fontSize: 18,
           letterSpacing: 3,
           color: "var(--cream)",
           lineHeight: 1,
@@ -111,10 +111,10 @@ function Navbar() {
               to={link.path}
               className={`nav-link ${isActive(link.path) ? "nav-link-active" : ""}`}
               style={{
-                fontFamily: "var(--font-body)",
-                fontSize: 13,
-                fontWeight: 500,
-                letterSpacing: 1,
+                fontFamily: "var(--font-heading)",
+                fontSize: 12,
+                fontWeight: 600,
+                letterSpacing: 1.5,
                 textTransform: "uppercase",
                 color: isActive(link.path) ? "var(--orange)" : "var(--cream-muted)",
                 transition: "color 0.3s ease",
@@ -146,8 +146,9 @@ function Navbar() {
           rel="noopener noreferrer"
           className="follow-btn nav-desktop"
           style={{
-            fontFamily: "var(--font-display)",
-            fontSize: 13,
+            fontFamily: "var(--font-heading)",
+            fontSize: 11,
+            fontWeight: 700,
             letterSpacing: 2,
             padding: "8px 20px",
             borderRadius: 24,
@@ -155,6 +156,7 @@ function Navbar() {
             color: "var(--orange)",
             background: "transparent",
             transition: "all 0.3s ease",
+            textTransform: "uppercase",
           }}
         >
           FOLLOW
@@ -240,8 +242,9 @@ function Navbar() {
           rel="noopener noreferrer"
           style={{
             marginTop: 16,
-            fontFamily: "var(--font-display)",
-            fontSize: 16,
+            fontFamily: "var(--font-heading)",
+            fontSize: 14,
+            fontWeight: 700,
             letterSpacing: 2,
             padding: "12px 32px",
             borderRadius: 24,
@@ -266,6 +269,8 @@ function Navbar() {
 function Footer() {
   return (
     <footer style={{
+      position: "relative",
+      overflow: "hidden",
       padding: "80px clamp(16px, 5vw, 40px) 40px",
       maxWidth: 1200,
       margin: "0 auto",
@@ -275,6 +280,8 @@ function Footer() {
           display: grid;
           grid-template-columns: 2fr 1fr 1fr;
           gap: 48px;
+          position: relative;
+          z-index: 1;
         }
         .footer-link:hover { color: var(--cream) !important; }
         @media (max-width: 640px) {
@@ -285,13 +292,33 @@ function Footer() {
         }
       `}</style>
 
+      {/* Watermark */}
+      <div style={{
+        position: "absolute",
+        bottom: -20,
+        left: "50%",
+        transform: "translateX(-50%)",
+        fontFamily: "var(--font-display)",
+        fontSize: "clamp(80px, 15vw, 140px)",
+        letterSpacing: 8,
+        color: "var(--cream)",
+        opacity: 0.02,
+        whiteSpace: "nowrap",
+        pointerEvents: "none",
+        userSelect: "none",
+        lineHeight: 1,
+        zIndex: 0,
+      }}>
+        FOODIETWINZZ
+      </div>
+
       <div className="footer-grid">
         {/* Brand */}
         <div>
           <p style={{
             fontFamily: "var(--font-display)",
             fontSize: 24,
-            letterSpacing: 4,
+            letterSpacing: 3,
             color: "var(--cream)",
             marginBottom: 12,
             lineHeight: 1,
@@ -379,8 +406,10 @@ function Footer() {
       {/* Divider */}
       <div style={{
         height: 1,
-        background: "rgba(245,240,232,0.06)",
+        background: "rgba(242,237,228,0.06)",
         margin: "40px 0 24px",
+        position: "relative",
+        zIndex: 1,
       }} />
 
       {/* Bottom row */}
@@ -390,6 +419,8 @@ function Footer() {
         alignItems: "center",
         flexWrap: "wrap",
         gap: 12,
+        position: "relative",
+        zIndex: 1,
       }}>
         <p style={{
           fontFamily: "var(--font-body)",
@@ -399,9 +430,9 @@ function Footer() {
           &copy; 2025 FoodieTwinzz. All rights reserved.
         </p>
         <p style={{
-          fontFamily: "var(--font-body)",
-          fontSize: 12,
-          color: "rgba(245,240,232,0.5)",
+          fontFamily: "var(--font-mono)",
+          fontSize: 11,
+          color: "rgba(242,237,228,0.3)",
         }}>
           Made with 🥢 in Anaheim
         </p>

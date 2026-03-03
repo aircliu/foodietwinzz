@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import useInstagramLive from "../hooks/useInstagramLive";
+import { getNextMilestone, getProgressToNext } from "../data/milestones";
 
 const keyframes = `
 @keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
@@ -54,83 +55,126 @@ function formatAgo(seconds) {
   return `${m}m ago`;
 }
 
-export default function LiveFollowerCount({ className, style }) {
+export default function LiveFollowerCount({ className, style, compact }) {
   const { followers, loading, error, secondsAgo } = useInstagramLive(60000);
   const hasData = followers !== null;
 
+  const nextMs = hasData ? getNextMilestone(followers) : null;
+  const progress = hasData ? getProgressToNext(followers) : 0;
+
+  // Compact mode (stats cards)
+  if (compact) {
+    return (
+      <div className={className} style={{ textAlign: "center", ...style }}>
+        <style>{keyframes}</style>
+        <div style={{
+          fontFamily: "var(--font-display)",
+          fontSize: 36,
+          color: "var(--cream)",
+          lineHeight: 1.1,
+        }}>
+          {loading && !hasData ? (
+            <span style={{ animation: "loadPulse 1.5s ease-in-out infinite" }}>---</span>
+          ) : hasData ? (
+            <AnimatedCount value={followers} />
+          ) : "—"}
+        </div>
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 6,
+        }}>
+          {hasData && !loading && (
+            <span style={{
+              width: 5, height: 5, borderRadius: "50%", background: "var(--green)",
+              display: "inline-block", animation: "livePulse 2s ease-in-out infinite",
+            }} />
+          )}
+          <span style={{
+            fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: 2,
+            color: "var(--orange)", textTransform: "uppercase",
+          }}>
+            FOLLOWERS
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // Full layout (hero)
   return (
-    <div className={className} style={{ textAlign: "center", ...style }}>
+    <div className={className} style={{ ...style }}>
       <style>{keyframes}</style>
 
-      {/* LIVE indicator */}
-      {hasData && !loading && (
+      <div style={{
+        display: "flex",
+        alignItems: "baseline",
+        gap: 12,
+        flexWrap: "wrap",
+      }}>
+        {hasData && !loading && (
+          <div style={{ display: "flex", alignItems: "center", gap: 6, alignSelf: "center" }}>
+            <span style={{
+              width: 6, height: 6, borderRadius: "50%", background: "var(--green)",
+              display: "inline-block", animation: "livePulse 2s ease-in-out infinite",
+            }} />
+            <span style={{
+              fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
+              letterSpacing: 2, color: "var(--green)", textTransform: "uppercase",
+            }}>LIVE</span>
+          </div>
+        )}
+
         <div style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 6,
-          marginBottom: 8,
+          fontFamily: "var(--font-display)",
+          fontSize: "clamp(40px, 8vw, 48px)",
+          color: "var(--cream)",
+          lineHeight: 1,
         }}>
-          <span style={{
-            width: 6,
-            height: 6,
-            borderRadius: "50%",
-            background: "var(--green)",
-            display: "inline-block",
-            animation: "livePulse 2s ease-in-out infinite",
-          }} />
-          <span style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: 2,
-            color: "var(--green)",
-            textTransform: "uppercase",
-          }}>
-            LIVE
-          </span>
+          {loading && !hasData ? (
+            <span style={{ animation: "loadPulse 1.5s ease-in-out infinite" }}>---</span>
+          ) : hasData ? (
+            <AnimatedCount value={followers} />
+          ) : (
+            <span style={{ fontSize: "clamp(20px, 4vw, 28px)" }}>FOLLOW US</span>
+          )}
+        </div>
+
+        <span style={{
+          fontFamily: "var(--font-mono)", fontSize: 12,
+          color: "var(--cream-muted)", letterSpacing: 1,
+        }}>followers</span>
+      </div>
+
+      {hasData && (
+        <div style={{
+          fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: 1,
+          color: "var(--cream-dim)", marginTop: 4,
+        }}>
+          Updated {formatAgo(secondsAgo)}
         </div>
       )}
 
-      {/* Count */}
-      <div style={{
-        fontFamily: "var(--font-display)",
-        fontSize: "clamp(48px, 10vw, 72px)",
-        color: "var(--cream)",
-        lineHeight: 1,
-        letterSpacing: 2,
-      }}>
-        {loading && !hasData ? (
-          <span style={{ animation: "loadPulse 1.5s ease-in-out infinite" }}>---</span>
-        ) : hasData ? (
-          <AnimatedCount value={followers} />
-        ) : (
-          <span style={{ fontSize: "clamp(24px, 5vw, 36px)" }}>FOLLOW US</span>
-        )}
-      </div>
-
-      {/* Label */}
-      <div style={{
-        fontFamily: "var(--font-mono)",
-        fontSize: 10,
-        letterSpacing: 2,
-        color: "var(--cream-muted)",
-        textTransform: "uppercase",
-        marginTop: 6,
-      }}>
-        Instagram followers
-      </div>
-
-      {/* Updated ago */}
+      {/* Progress bar to next milestone */}
       {hasData && (
-        <div style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: 9,
-          letterSpacing: 1,
-          color: "var(--cream-dim)",
-          marginTop: 4,
-        }}>
-          Updated {formatAgo(secondsAgo)}
+        <div style={{ marginTop: 12 }}>
+          <div style={{
+            width: 200, height: 3, borderRadius: 2, background: "var(--surface-2)",
+            overflow: "hidden",
+          }}>
+            <div style={{
+              height: "100%", borderRadius: 2,
+              width: `${progress}%`,
+              background: "var(--orange)",
+              transition: "width 0.8s ease",
+            }} />
+          </div>
+          <div style={{
+            fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: 1,
+            color: "var(--cream-dim)", marginTop: 4,
+          }}>
+            {nextMs
+              ? `NEXT: ${(nextMs.threshold / 1000).toLocaleString()}K — ${nextMs.spot.toUpperCase()}`
+              : "ALL MILESTONES COMPLETE 🏆"}
+          </div>
         </div>
       )}
     </div>

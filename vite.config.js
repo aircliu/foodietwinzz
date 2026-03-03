@@ -1,27 +1,47 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import https from 'https'
 
-function fetchInstagram() {
-  return new Promise((resolve, reject) => {
-    https.get({
-      hostname: 'i.instagram.com',
-      path: '/api/v1/users/web_profile_info/?username=foodietwinzz',
+async function fetchFromBlastUp() {
+  try {
+    // Step 1: GET page to grab CSRF token
+    const pageRes = await fetch(
+      'https://blastup.com/instagram-follower-count?foodietwinzz',
+      {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+      }
+    );
+
+    if (!pageRes.ok) return null;
+
+    const html = await pageRes.text();
+    const tokenMatch = html.match(/token:\s*"([^"]+)"/);
+    if (!tokenMatch) return null;
+
+    const rawCookies = pageRes.headers.getSetCookie ? pageRes.headers.getSetCookie() : [];
+    const cookies = rawCookies.map(c => c.split(';')[0]).join('; ');
+
+    // Step 2: POST to API with token
+    const apiRes = await fetch('https://blastup.com/instagram-follower-count', {
+      method: 'POST',
       headers: {
-        'User-Agent': 'Instagram 275.0.0.27.98 Android',
-        'X-IG-App-ID': '936619743392459',
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'Referer': 'https://blastup.com/instagram-follower-count?foodietwinzz',
+        'Cookie': cookies,
       },
-    }, (res) => {
-      let data = '';
-      res.on('data', c => data += c);
-      res.on('end', () => {
-        try {
-          const j = JSON.parse(data);
-          resolve(j?.data?.user?.edge_followed_by?.count || null);
-        } catch { resolve(null); }
-      });
-    }).on('error', () => resolve(null));
-  });
+      body: JSON.stringify({ _token: tokenMatch[1], username: 'foodietwinzz' }),
+    });
+
+    if (!apiRes.ok) return null;
+
+    const data = await apiRes.json();
+    return data.success && data.followers ? data.followers : null;
+  } catch {
+    return null;
+  }
 }
 
 export default defineConfig({
@@ -38,7 +58,7 @@ export default defineConfig({
           res.setHeader('Content-Type', 'application/json');
           res.setHeader('Access-Control-Allow-Origin', '*');
 
-          const count = await fetchInstagram();
+          const count = await fetchFromBlastUp();
           if (count) {
             let formatted;
             if (count >= 1000000) formatted = (count / 1000000).toFixed(1) + 'M';
@@ -50,7 +70,7 @@ export default defineConfig({
               followers: count,
               formatted,
               lastUpdated: new Date().toISOString(),
-              source: 'live',
+              source: 'blastup',
             }));
           } else {
             res.statusCode = 200;
