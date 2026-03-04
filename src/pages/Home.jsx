@@ -244,18 +244,11 @@ export default function Home() {
           <div className="hero-right">
             <FadeIn visible={heroLoaded} delay={0.15}>
               <div style={{ position: "relative" }}>
-                <div style={{
-                  position: "absolute", top: -20, right: -20, bottom: 20, left: 20,
-                  border: "2px solid rgba(255,92,53,0.15)", borderRadius: 20,
-                  pointerEvents: "none", zIndex: 0,
-                }} />
                 <img
                   src={heroImg} alt="FoodieTwinzz" loading="lazy"
                   style={{
-                    width: "100%", aspectRatio: "4/5", objectFit: "cover",
-                    borderRadius: 20, position: "relative", zIndex: 1,
-                    transform: "rotate(2deg)",
-                    border: "2px solid rgba(242,237,228,0.08)",
+                    width: "100%", aspectRatio: "1/1", objectFit: "cover",
+                    borderRadius: "50%", position: "relative", zIndex: 1,
                     boxShadow: "0 32px 64px rgba(0,0,0,0.5)",
                   }}
                 />

@@ -1,8 +1,73 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef } from "react";
 import { Link } from "react-router-dom";
 import LiveFollowerCount from "../components/LiveFollowerCount";
 import useInstagramLive from "../hooks/useInstagramLive";
 import { milestones, getMilestoneStatus, getFilmedCount, getSpentSoFar, TOTAL_BUDGET } from "../data/milestones";
+
+const VIDEOS = ["/video1.mp4", "/video2.mp4"];
+
+const GAP = 16;
+const CARD_W = 220;
+const CARD_H = 390;
+
+const VideoCarousel = forwardRef(function VideoCarousel({ visible }, ref) {
+  const oneSetPx = VIDEOS.length * (CARD_W + GAP);
+  const track = [...VIDEOS, ...VIDEOS, ...VIDEOS];
+  const speed = VIDEOS.length * 12;
+
+  return (
+    <div ref={ref} style={{
+      overflow: "hidden",
+      width: "100vw", marginLeft: "calc(-50vw + 50%)",
+      padding: "24px 0 60px",
+      position: "relative",
+      opacity: visible ? 1 : 0,
+      transform: visible ? "translateY(0)" : "translateY(20px)",
+      transition: "opacity 0.6s ease-out, transform 0.6s ease-out",
+    }}>
+      <style>{`
+        @keyframes marqueeScroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-${oneSetPx}px); }
+        }
+      `}</style>
+      {/* Left fade */}
+      <div style={{
+        position: "absolute", top: 0, left: 0, bottom: 0, width: "30vw",
+        background: "linear-gradient(to right, var(--bg) 20%, transparent)",
+        zIndex: 2, pointerEvents: "none",
+      }} />
+      {/* Right fade */}
+      <div style={{
+        position: "absolute", top: 0, right: 0, bottom: 0, width: "30vw",
+        background: "linear-gradient(to left, var(--bg) 20%, transparent)",
+        zIndex: 2, pointerEvents: "none",
+      }} />
+      <div style={{
+        display: "flex", gap: GAP,
+        animation: `marqueeScroll ${speed}s linear infinite`,
+        width: "max-content",
+        paddingLeft: `calc(50vw - ${CARD_W + GAP / 2}px)`,
+      }}>
+        {track.map((src, i) => (
+          <div key={i} style={{
+            width: CARD_W, height: CARD_H,
+            borderRadius: 16, overflow: "hidden", flexShrink: 0,
+          }}>
+            <video
+              src={src}
+              autoPlay
+              muted
+              loop
+              playsInline
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+});
 
 function useReveal(threshold = 0.15) {
   const ref = useRef(null);
@@ -72,8 +137,8 @@ function MilestoneRow({ data, index, visible, status, justFilmed }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <span style={{
           display: "block", fontFamily: "var(--font-heading)", fontSize: 14,
-          fontWeight: 600, color: "var(--cream)", marginBottom: 2,
-        }}>{data.spot}</span>
+          fontWeight: 600, color: isLocked ? "var(--cream-dim)" : "var(--cream)", marginBottom: 2,
+        }}>{isLocked ? "WHERE SHOULD WE EAT NEXT?" : data.spot}</span>
         <span style={{
           fontFamily: "var(--font-mono)", fontSize: 12,
           color: "var(--cream-muted)",
@@ -183,42 +248,6 @@ export default function Challenge() {
           }}>
             <LiveFollowerCount compact style={{}} />
           </div>
-          <div style={{
-            flex: 1, minWidth: 140,
-            background: "var(--surface-2)", border: "1px solid var(--cream-dim)",
-            borderRadius: 12, padding: "20px 28px", textAlign: "center",
-          }}>
-            <span style={{ display: "block", fontFamily: "var(--font-display)", fontSize: 36, color: "var(--cream)", lineHeight: 1.1 }}>
-              {filmed}/{milestones.length}
-            </span>
-            <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--orange)", letterSpacing: 2, marginTop: 6, textTransform: "uppercase" }}>
-              FILMED
-            </span>
-          </div>
-          <div style={{
-            flex: 1, minWidth: 140,
-            background: "var(--surface-2)", border: "1px solid var(--cream-dim)",
-            borderRadius: 12, padding: "20px 28px", textAlign: "center",
-          }}>
-            <span style={{ display: "block", fontFamily: "var(--font-display)", fontSize: 36, color: "var(--cream)", lineHeight: 1.1 }}>
-              ${spent}
-            </span>
-            <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--cream-muted)", letterSpacing: 2, marginTop: 6, textTransform: "uppercase" }}>
-              SPENT SO FAR
-            </span>
-          </div>
-          <div style={{
-            flex: 1, minWidth: 140,
-            background: "var(--surface-2)", border: "1px solid var(--cream-dim)",
-            borderRadius: 12, padding: "20px 28px", textAlign: "center",
-          }}>
-            <span style={{ display: "block", fontFamily: "var(--font-display)", fontSize: 36, color: "var(--cream)", lineHeight: 1.1 }}>
-              ${TOTAL_BUDGET}
-            </span>
-            <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--cream-muted)", letterSpacing: 2, marginTop: 6, textTransform: "uppercase" }}>
-              TOTAL IF COMPLETED
-            </span>
-          </div>
         </div>
       </div>
 
@@ -235,26 +264,8 @@ export default function Challenge() {
         </div>
       </div>
 
-      {/* Milestone rows */}
-      <div ref={timelineRef} style={{
-        maxWidth: 900, margin: "0 auto",
-        padding: "24px clamp(20px, 5vw, 60px) 60px",
-        display: "flex", flexDirection: "column", gap: 12,
-      }}>
-        {milestones.map((m, i) => {
-          const status = getMilestoneStatus(m, followers);
-          return (
-            <MilestoneRow
-              key={m.threshold}
-              data={m}
-              index={i}
-              visible={timelineVis}
-              status={status}
-              justFilmed={justFilmedSet.has(m.threshold)}
-            />
-          );
-        })}
-      </div>
+      {/* Video Carousel */}
+      <VideoCarousel ref={timelineRef} visible={timelineVis} />
 
       {/* Suggest a Spot CTA */}
       <div ref={ctaRef} style={{
