@@ -11,8 +11,9 @@ export default function useInstagramLive(intervalMs = 60000) {
 
   const fetchCount = useCallback(() => {
     fetch("/api/instagram")
-      .then((r) => r.json())
+      .then((r) => r.json().catch(() => null))
       .then((d) => {
+        if (!d) return setLoading(false);
         if (d.followers !== null && d.followers !== undefined) {
           setFollowers(d.followers);
           setFormatted(d.formatted);

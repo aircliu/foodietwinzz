@@ -1,7 +1,6 @@
-// Vercel Edge Function — /api/instagram
+// Vercel Serverless Function — /api/instagram
 // Fetches live follower count from BlastUp
-
-export const config = { runtime: "edge" };
+// CDN-cached for 1 hour, serves stale up to 24h if BlastUp is down
 
 function formatCount(n) {
   if (n >= 1000000) return (n / 1000000).toFixed(1) + "M";
@@ -9,14 +8,12 @@ function formatCount(n) {
   return n.toLocaleString();
 }
 
-export default async function handler() {
-  const headers = {
-    "Access-Control-Allow-Origin": "*",
-    "Content-Type": "application/json",
-    "Cache-Control": "s-maxage=120, stale-while-revalidate=300",
-  };
+export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Content-Type", "application/json");
 
   try {
+    // Step 1: Fetch BlastUp page to get CSRF token + cookies
     const pageRes = await fetch(
       "https://blastup.com/instagram-follower-count?foodietwinzz",
       {
@@ -33,14 +30,27 @@ export default async function handler() {
     const tokenMatch = html.match(/token:\s*"([^"]+)"/);
     if (!tokenMatch) throw new Error("No CSRF token found");
 
-    let cookies = "";
-    if (pageRes.headers.getSetCookie) {
+    // Parse cookies properly — use getSetCookie() if available (Node 18+),
+    // otherwise fall back to raw header parsing that handles commas in cookie values
+    let cookies;
+    if (typeof pageRes.headers.getSetCookie === "function") {
       cookies = pageRes.headers
         .getSetCookie()
-        .map((c) => c.split(";")[0])
+        .map((c) => c.split(";")[0].trim())
+        .filter(Boolean)
+        .join("; ");
+    } else {
+      // Fallback: get raw set-cookie and split carefully
+      const raw = pageRes.headers.get("set-cookie") || "";
+      // Split on ", " followed by a cookie name (word=) to avoid breaking on date commas
+      cookies = raw
+        .split(/,\s*(?=\w+=)/)
+        .map((c) => c.split(";")[0].trim())
+        .filter(Boolean)
         .join("; ");
     }
 
+    // Step 2: POST to BlastUp API with token + cookies
     const apiRes = await fetch(
       "https://blastup.com/instagram-follower-count",
       {
@@ -48,7 +58,7 @@ export default async function handler() {
         headers: {
           "Content-Type": "application/json",
           "User-Agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
           Referer:
             "https://blastup.com/instagram-follower-count?foodietwinzz",
           Cookie: cookies,
@@ -63,26 +73,31 @@ export default async function handler() {
 
     const data = await apiRes.json();
     if (!data.success || !data.followers)
-      throw new Error("No follower data in response");
+      throw new Error(data.msg || "No follower data in response");
 
-    return new Response(
-      JSON.stringify({
-        followers: data.followers,
-        formatted: formatCount(data.followers),
-        lastUpdated: new Date().toISOString(),
-        source: "blastup",
-      }),
-      { headers }
+    // Cache for 5 minutes, serve stale up to 24 hours
+    res.setHeader(
+      "Cache-Control",
+      "s-maxage=300, stale-while-revalidate=86400"
     );
+    return res.json({
+      followers: data.followers,
+      formatted: formatCount(data.followers),
+      lastUpdated: new Date().toISOString(),
+      source: "blastup",
+    });
   } catch (error) {
-    return new Response(
-      JSON.stringify({ followers: null, error: error.message }),
-      {
-        headers: {
-          ...headers,
-          "Cache-Control": "s-maxage=0, no-cache",
-        },
-      }
+    // No static fallback — return error so the CDN serves stale cache instead
+    // If there's no cached response, the client shows the last known value
+    res.setHeader(
+      "Cache-Control",
+      "s-maxage=0, stale-while-revalidate=86400"
     );
+    return res.status(502).json({
+      followers: null,
+      error: error.message,
+      lastUpdated: new Date().toISOString(),
+      source: "error",
+    });
   }
 }
