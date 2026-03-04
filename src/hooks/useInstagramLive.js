@@ -10,10 +10,9 @@ export default function useInstagramLive(intervalMs = 60000) {
   const lastSuccessRef = useRef(null);
 
   const fetchCount = useCallback(() => {
-    fetch("/api/instagram")
-      .then((r) => r.json().catch(() => null))
+    fetch("/followers.json?_=" + Date.now())
+      .then((r) => r.json())
       .then((d) => {
-        if (!d) return setLoading(false);
         if (d.followers !== null && d.followers !== undefined) {
           setFollowers(d.followers);
           setFormatted(d.formatted);
@@ -21,8 +20,7 @@ export default function useInstagramLive(intervalMs = 60000) {
           setError(null);
           lastSuccessRef.current = Date.now();
         } else {
-          setError(d.error || "unknown");
-          // Keep last successful value — don't blank it out
+          setError("No follower data");
         }
         setLoading(false);
       })

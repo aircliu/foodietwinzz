@@ -1,0 +1,77 @@
+name: Update Follower Count
+
+on:
+  schedule:
+    - cron: "*/15 * * * *" # Every 15 minutes
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch follower count from Instagram
+        run: |
+          RESPONSE=$(curl -s \
+            "https://i.instagram.com/api/v1/users/web_profile_info/?username=foodietwinzz" \
+            -H "User-Agent: Instagram 275.0.0.27.98 Android" \
+            -H "X-IG-App-ID: 936619743392459")
+
+          COUNT=$(echo "$RESPONSE" | python3 -c "
+          import sys, json
+          try:
+              d = json.load(sys.stdin)
+              print(d['data']['user']['edge_followed_by']['count'])
+          except:
+              print('')
+          ")
+
+          if [ -z "$COUNT" ] || [ "$COUNT" = "None" ]; then
+            echo "Failed to fetch count, skipping update"
+            exit 0
+          fi
+
+          echo "Follower count: $COUNT"
+
+          # Format the count
+          FORMATTED=$(python3 -c "
+          n = $COUNT
+          if n >= 1000000:
+              print(f'{n/1000000:.1f}M')
+          elif n >= 10000:
+              print(f'{n/1000:.1f}K')
+          else:
+              print(f'{n:,}')
+          ")
+
+          # Write JSON
+          cat > public/followers.json << EOF
+          {
+            "followers": $COUNT,
+            "formatted": "$FORMATTED",
+            "lastUpdated": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "source": "instagram"
+          }
+          EOF
+
+          # Clean up whitespace from heredoc
+          python3 -c "
+          import json
+          with open('public/followers.json') as f:
+              d = json.load(f)
+          with open('public/followers.json', 'w') as f:
+              json.dump(d, f, indent=2)
+              f.write('\n')
+          "
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/followers.json
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "update follower count"
+          git push
