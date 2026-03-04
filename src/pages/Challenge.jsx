@@ -171,7 +171,7 @@ export default function Challenge() {
           margin: "0 0 32px",
           maxWidth: 500,
         }}>
-          $1 for every 100 followers. Each milestone unlocks a new Anaheim restaurant.
+          $1 for every 100 followers. Each milestone unlocks a new restaurant.
         </p>
 
         {/* Stats */}

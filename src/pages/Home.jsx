@@ -2,8 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import heroImg from "../assets/hero.png";
 import LiveFollowerCount from "../components/LiveFollowerCount";
-import useInstagramLive from "../hooks/useInstagramLive";
-import { getNextMilestone } from "../data/milestones";
 
 function useReveal(threshold = 0.15) {
   const ref = useRef(null);
@@ -41,191 +39,6 @@ const HOW_STEPS = [
   { step: "04", title: "YOU WATCH US FEAST", desc: "Unfiltered reviews posted to TikTok and Instagram.", icon: "🎬" },
 ];
 
-const votingOptions = {
-  4000: [
-    { id: "musubi-square", emoji: "🍣", name: "Musubi Square", desc: "Wagyu feta taco + spam trio + bulgogi bowl. Sushi taco spread." },
-    { id: "bruxie", emoji: "🧇", name: "Bruxie", desc: "Gourmet waffle sandwiches. Fried chicken + sweet combos." },
-    { id: "taqueria-de-anda", emoji: "🌯", name: "Taqueria de Anda", desc: "24-hour street tacos. Birria + al pastor at 2am." },
-  ],
-  5000: [
-    { id: "tacos-los-cholos", emoji: "🌮", name: "Tacos Los Cholos", desc: "LA Taco Madness Champs. Filet mignon tacos + Cholo Pizza." },
-    { id: "brodard-restaurant", emoji: "🍢", name: "Brodard Restaurant", desc: "Legendary Vietnamese egg rolls. Nem nướng since 1985." },
-    { id: "anaheim-white-house", emoji: "🍝", name: "Anaheim White House", desc: "Italian fine dining in a historic 1909 mansion." },
-  ],
-  6000: [
-    { id: "anaheim-packing-house", emoji: "🍜", name: "Anaheim Packing House", desc: "4-vendor food hall crawl. Anti-Gravity Noodles + Dim Sum." },
-    { id: "the-ranch", emoji: "🥩", name: "The Ranch Restaurant", desc: "Upscale American. Oak-grilled steaks & craft cocktails." },
-    { id: "playground-dtsa", emoji: "🧑‍🍳", name: "Playground DTSA", desc: "Chef's daily menu. No menu — you eat what they make." },
-  ],
-  7000: [
-    { id: "sona-fusion", emoji: "🔥", name: "Sona Fusion Kitchen", desc: "Vietnamese-Peruvian fusion. Truffle fries + lomo saltado." },
-    { id: "gabbi-mexican-kitchen", emoji: "🫔", name: "Gabbi's Mexican Kitchen", desc: "Upscale Mexican in Old Towne Orange. Mole flights." },
-    { id: "mix-mix-kitchen", emoji: "🍱", name: "Mix Mix Kitchen", desc: "Filipino fusion by a Top Chef alum. Creative tasting menus." },
-  ],
-  8000: [
-    { id: "khan-saab", emoji: "👑", name: "Khan Saab", desc: "Michelin Bib Gourmand. Lamb chops + smoked beef kebab." },
-    { id: "tangata", emoji: "🦞", name: "Tángatá", desc: "Inside the Bowers Museum. Upscale brunch & seafood." },
-    { id: "the-hobbit", emoji: "🧙", name: "The Hobbit Restaurant", desc: "7-course dinner in a Tolkien-themed cottage. No joke." },
-  ],
-  9000: [
-    { id: "heritage-71-bbq", emoji: "🥩", name: "Heritage 71 BBQ", desc: "Texas-style pit BBQ. Brisket + ribs + pulled pork." },
-    { id: "anjins", emoji: "🍖", name: "Anjin", desc: "Japanese BBQ yakiniku. A5 wagyu + premium cuts." },
-    { id: "il-barone", emoji: "🍕", name: "Il Barone Ristorante", desc: "Authentic Sicilian Italian. Wood-fired everything." },
-  ],
-  10000: [
-    { id: "wooden-pearl", emoji: "🥂", name: "The Wooden Pearl", desc: "Surf & turf celebration. Premium steak + fresh seafood." },
-    { id: "napa-rose", emoji: "🍷", name: "Napa Rose", desc: "Disney Grand Californian fine dining. Wine country cuisine." },
-    { id: "the-cellar", emoji: "🕯️", name: "The Cellar Restaurant", desc: "Underground French fine dining since 1969. The $100 splurge." },
-  ],
-};
-
-function VotingSection({ followers }) {
-  const nextMilestone = getNextMilestone(followers);
-  const threshold = nextMilestone?.threshold;
-  // Fall back to the first available voting options if threshold not in map
-  const availableThresholds = Object.keys(votingOptions).map(Number).sort((a, b) => a - b);
-  const options = threshold
-    ? (votingOptions[threshold] || votingOptions[availableThresholds[0]])
-    : votingOptions[availableThresholds[0]];
-  const allComplete = !nextMilestone && followers >= 10000;
-
-  const [voted, setVoted] = useState(null);
-  const [votes, setVotes] = useState(null);
-
-  // Initialize random seed votes once
-  useEffect(() => {
-    if (options && !votes) {
-      const init = {};
-      options.forEach(o => { init[o.id] = Math.floor(Math.random() * 50) + 10; });
-      setVotes(init);
-    }
-  }, [options, votes]);
-
-  // Reset when threshold changes
-  useEffect(() => {
-    setVoted(null);
-    setVotes(null);
-  }, [threshold]);
-
-  const handleVote = (id) => {
-    setVotes(prev => {
-      const next = { ...prev };
-      if (voted) next[voted] = Math.max(0, next[voted] - 1);
-      next[id] = (next[id] || 0) + 1;
-      return next;
-    });
-    setVoted(id);
-  };
-
-  if (allComplete) {
-    return (
-      <div style={{ textAlign: "center", padding: "60px 20px" }}>
-        <span style={{ fontSize: 64, display: "block", marginBottom: 16 }}>🏆</span>
-        <h3 style={{
-          fontFamily: "var(--font-display)", fontSize: "clamp(32px, 6vw, 48px)",
-          color: "var(--cream)", margin: "0 0 12px", letterSpacing: 2,
-        }}>CHALLENGE COMPLETE</h3>
-        <p style={{
-          fontFamily: "var(--font-body)", fontSize: 16,
-          color: "var(--cream-muted)", margin: 0,
-        }}>Every milestone has been conquered. Thanks for riding with us.</p>
-      </div>
-    );
-  }
-
-  // Loading skeleton
-  if (!options || !votes) {
-    return (
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
-        {[0, 1, 2].map(i => (
-          <div key={i} style={{
-            background: "var(--surface-2)", border: "1px solid var(--cream-dim)",
-            borderRadius: 16, padding: 28, height: 240,
-            animation: "skeletonPulse 1.5s ease-in-out infinite",
-            animationDelay: `${i * 0.15}s`,
-          }} />
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-        gap: 16,
-      }}>
-        {options.map(opt => {
-          const isVoted = voted === opt.id;
-          return (
-            <VoteCard
-              key={opt.id}
-              option={opt}
-              isVoted={isVoted}
-              voteCount={votes[opt.id] || 0}
-              onVote={() => handleVote(opt.id)}
-            />
-          );
-        })}
-      </div>
-      <p style={{
-        fontFamily: "var(--font-mono)", fontSize: 11,
-        color: "var(--cream-dim)", textAlign: "center",
-        marginTop: 20, letterSpacing: 1,
-      }}>
-        Results are live. Follow to unlock this milestone.
-      </p>
-    </>
-  );
-}
-
-function VoteCard({ option, isVoted, voteCount, onVote }) {
-  const [hover, setHover] = useState(false);
-  return (
-    <div
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        background: isVoted ? "rgba(255,92,53,0.04)" : "var(--surface-2)",
-        border: `1px solid ${isVoted ? "rgba(255,92,53,0.4)" : hover ? "rgba(242,237,228,0.15)" : "var(--cream-dim)"}`,
-        borderRadius: 16, padding: 28, textAlign: "center",
-        cursor: "pointer", transition: "all 0.3s ease",
-        transform: hover && !isVoted ? "translateY(-4px)" : "translateY(0)",
-        boxShadow: isVoted ? "0 0 24px rgba(255,92,53,0.08)" : hover ? "0 12px 32px rgba(0,0,0,0.2)" : "none",
-      }}
-      onClick={onVote}
-    >
-      <span style={{ fontSize: 48, display: "block", marginBottom: 12 }}>{option.emoji}</span>
-      <h4 style={{
-        fontFamily: "var(--font-heading)", fontSize: 18, fontWeight: 700,
-        color: "var(--cream)", margin: "0 0 8px",
-      }}>{option.name}</h4>
-      <p style={{
-        fontFamily: "var(--font-body)", fontSize: 13,
-        color: "var(--cream-muted)", margin: "0 0 16px",
-        lineHeight: 1.5, minHeight: 40,
-      }}>{option.desc}</p>
-      <span style={{
-        fontFamily: "var(--font-mono)", fontSize: 12,
-        color: "var(--cream-dim)", display: "block", marginBottom: 12,
-      }}>{voteCount} votes</span>
-      <button
-        style={{
-          fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700,
-          letterSpacing: 2, textTransform: "uppercase",
-          padding: "10px 24px", borderRadius: 8,
-          border: isVoted ? "none" : "1px solid var(--orange)",
-          color: isVoted ? "var(--bg)" : "var(--orange)",
-          background: isVoted ? "var(--orange)" : "transparent",
-          cursor: "pointer", transition: "all 0.2s ease",
-        }}
-        onClick={e => { e.stopPropagation(); onVote(); }}
-      >{isVoted ? "VOTED ✓" : "VOTE"}</button>
-    </div>
-  );
-}
-
 function MerchComingSoon({ visible }) {
   const [email, setEmail] = useState("");
   const [emailSubmitted, setEmailSubmitted] = useState(false);
@@ -234,8 +47,6 @@ function MerchComingSoon({ visible }) {
   const handleEmailSubmit = (e) => {
     e.preventDefault();
     if (!email.trim()) return;
-    // TODO: connect to Mailchimp or email list
-    console.log("Merch email signup:", email);
     setEmailSubmitted(true);
   };
 
@@ -331,18 +142,14 @@ function MerchComingSoon({ visible }) {
 export default function Home() {
   const [heroLoaded, setHeroLoaded] = useState(false);
   const [howRef, howVis] = useReveal(0.1);
-  const [voteRef, voteVis] = useReveal(0.1);
   const [merchRef, merchVis] = useReveal(0.15);
   const [ctaRef, ctaVis] = useReveal(0.15);
-  const { followers } = useInstagramLive();
-
   useEffect(() => { setHeroLoaded(true); }, []);
 
   return (
     <>
       <style>{`
         @keyframes heroChevronBounce { 0%,100%{ transform: translateX(-50%) translateY(0); } 50%{ transform: translateX(-50%) translateY(8px); } }
-        @keyframes skeletonPulse { 0%,100%{ opacity: 0.3; } 50%{ opacity: 0.15; } }
         .hero-split { display: flex; align-items: center; gap: clamp(32px, 5vw, 64px); max-width: 1200px; margin: 0 auto; width: 100%; }
         .hero-left { flex: 0 1 55%; min-width: 0; }
         .hero-right { flex: 0 1 45%; min-width: 0; }
@@ -376,7 +183,7 @@ export default function Home() {
             <FadeIn visible={heroLoaded} delay={0}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
                 <div style={{ width: 40, height: 1, background: "var(--orange)" }} />
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: 3, color: "var(--orange)" }}>ANAHEIM, CA</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: 3, color: "var(--orange)" }}>SoCal</span>
               </div>
             </FadeIn>
 
@@ -443,7 +250,7 @@ export default function Home() {
                   pointerEvents: "none", zIndex: 0,
                 }} />
                 <img
-                  src={heroImg} alt="FoodieTwinzz"
+                  src={heroImg} alt="FoodieTwinzz" loading="lazy"
                   style={{
                     width: "100%", aspectRatio: "4/5", objectFit: "cover",
                     borderRadius: 20, position: "relative", zIndex: 1,
@@ -520,50 +327,6 @@ export default function Home() {
               }}>{step.desc}</p>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* ===== CHOOSE OUR NEXT SPOT ===== */}
-      <section ref={voteRef} style={{
-        padding: "100px clamp(20px, 5vw, 60px)",
-        position: "relative", overflow: "hidden",
-      }}>
-        <div style={{
-          position: "absolute", top: -20, left: "5%",
-          fontFamily: "var(--font-display)", fontSize: "clamp(120px, 20vw, 200px)",
-          color: "var(--orange)", opacity: 0.04, lineHeight: 1,
-          pointerEvents: "none", userSelect: "none",
-        }}>02</div>
-
-        <div style={{
-          maxWidth: 1200, margin: "0 auto",
-          opacity: voteVis ? 1 : 0, transform: voteVis ? "translateY(0)" : "translateY(30px)",
-          transition: "opacity 0.7s ease-out, transform 0.7s ease-out",
-        }}>
-          <h2 style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "clamp(36px, 7vw, 56px)",
-            color: "var(--cream)", margin: "0 0 12px", lineHeight: 1, letterSpacing: 2,
-          }}>CHOOSE OUR NEXT SPOT</h2>
-          <p style={{
-            fontFamily: "var(--font-body)", fontSize: 16,
-            color: "var(--cream-muted)", margin: "0 0 36px",
-            lineHeight: 1.6, maxWidth: 520,
-          }}>The next milestone is unlocked by followers — but YOU decide where we eat.</p>
-
-          <VotingSection followers={followers} />
-
-          <Link
-            to="/challenge"
-            style={{
-              display: "inline-block", marginTop: 24,
-              fontFamily: "var(--font-heading)", fontSize: 14, fontWeight: 700,
-              color: "var(--orange)", textDecoration: "none",
-              letterSpacing: 1, transition: "all 0.2s ease",
-            }}
-            onMouseEnter={e => { e.currentTarget.style.textDecoration = "underline"; e.currentTarget.style.textUnderlineOffset = "6px"; }}
-            onMouseLeave={e => { e.currentTarget.style.textDecoration = "none"; }}
-          >VIEW ALL MILESTONES →</Link>
         </div>
       </section>
 

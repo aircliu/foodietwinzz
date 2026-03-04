@@ -73,7 +73,12 @@ export default function Community() {
       setTimeout(() => setShaking({}), 500);
       return;
     }
-    console.log("Fan Suggestion:", { restaurant: form.name, reason: form.why, tiktok: form.tiktok || null });
+    const params = new URLSearchParams({
+      "entry.1550660980": form.name,
+      "entry.1981217862": form.why,
+      "entry.330589926": form.tiktok,
+    });
+    new Image().src = `https://docs.google.com/forms/d/e/1FAIpQLSc9DiMavGKY3hko6zfVGB74TibWgT2oVrKCnC4VWOREHPoSKg/formResponse?${params}&submit=Submit`;
     setSubmitted(true);
   };
 
@@ -116,7 +121,7 @@ export default function Community() {
             maxWidth: 560,
             lineHeight: 1.6,
           }}>
-            Know a hidden gem in Anaheim? Tell us where to eat next. The best suggestions get featured on our page.
+            Know a hidden gem? Tell us where to eat next. The best suggestions get featured on our page.
           </p>
         </div>
       </div>
@@ -227,7 +232,7 @@ export default function Community() {
               </div>
 
               <div>
-                <label style={labelBase}>YOUR TIKTOK @</label>
+                <label style={labelBase}>YOUR INSTAGRAM @</label>
                 <div style={{ position: "relative" }}>
                   <span style={{
                     position: "absolute", left: 16, top: "50%",
@@ -241,7 +246,7 @@ export default function Community() {
                     onChange={(e) => handleChange("tiktok", e.target.value)}
                     onFocus={() => setFocused("tiktok")}
                     onBlur={() => setFocused(null)}
-                    placeholder="yourhandle"
+                    placeholder="yourusername"
                     style={{
                       ...inputBase,
                       paddingLeft: 32,

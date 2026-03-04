@@ -1,4 +1,6 @@
 import { useState } from "react";
+import useInstagramLive from "../hooks/useInstagramLive";
+import { getFilmedCount } from "../data/milestones";
 
 const INQUIRY_OPTIONS = ["Get Reviewed", "Book Us for Content", "Sponsorship / Collab", "Other"];
 
@@ -59,6 +61,7 @@ const infoCardBase = {
 };
 
 export default function Contact() {
+  const { followers } = useInstagramLive();
   const [form, setForm] = useState({
     restaurantName: "",
     contactName: "",
@@ -101,7 +104,15 @@ export default function Contact() {
       setTimeout(() => setShaking({}), 500);
       return;
     }
-    console.log("Restaurant Inquiry Submitted:", form);
+    const params = new URLSearchParams({
+      "entry.74311136": form.restaurantName,
+      "entry.879723715": form.contactName,
+      "entry.68835238": form.email,
+      "entry.1892623605": form.phone,
+      "entry.1603563027": form.lookingFor,
+      "entry.548184967": form.message,
+    });
+    new Image().src = `https://docs.google.com/forms/d/e/1FAIpQLSd1uLpNGX7u1nq6kdfzKkwCi--CT_tcT3lQ6025QqukjncmLQ/formResponse?${params}&submit=Submit`;
     setSubmitted(true);
   };
 
@@ -453,7 +464,7 @@ export default function Contact() {
             {[
               { emoji: "📸", text: "Full TikTok + Instagram coverage" },
               { emoji: "🎬", text: "Professional food content creation" },
-              { emoji: "📊", text: "Audience of 4,000+ local food lovers" },
+              { emoji: "📊", text: `Audience of ${followers ? (followers >= 1000 ? `${(followers / 1000).toFixed(followers % 1000 === 0 ? 0 : 1)}K` : followers) : "…"}+ local food lovers` },
             ].map((item, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, margin: "10px 0" }}>
                 <span style={{ fontSize: 20, flexShrink: 0 }}>{item.emoji}</span>
@@ -477,9 +488,9 @@ export default function Contact() {
             }}>OUR STATS</p>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0 }}>
               {[
-                { num: "7+", label: "Restaurants" },
+                { num: `${getFilmedCount(followers)}+`, label: "Restaurants" },
                 { num: "335K+", label: "TikTok Likes" },
-                { num: "4K+", label: "Followers" },
+                { num: followers ? (followers >= 1000 ? `${(followers / 1000).toFixed(followers % 1000 === 0 ? 0 : 1)}K+` : `${followers}+`) : "…", label: "Followers" },
                 { num: "100%", label: "Engagement" },
               ].map((stat, i) => (
                 <div key={i} style={{ textAlign: "center", padding: 16 }}>

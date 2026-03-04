@@ -1,6 +1,6 @@
-# FoodieTwinzz — Viral Anaheim Eats Challenge
+# FoodieTwinzz — Viral Eats Challenge
 
-$1 for every 100 followers — finding the most viral food spots in Anaheim at every price point.
+$1 for every 100 followers — finding the most viral food spots at every price point.
 
 ## Deploy to Vercel (2 minutes)
 

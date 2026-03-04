@@ -332,7 +332,7 @@ function Footer() {
             lineHeight: 1.6,
             maxWidth: 280,
           }}>
-            Twin food reviewers taking on Anaheim's best restaurants, one milestone at a time.
+            Twin food reviewers taking on the best restaurants, one milestone at a time.
           </p>
         </div>
 
@@ -427,14 +427,14 @@ function Footer() {
           fontSize: 12,
           color: "var(--cream-muted)",
         }}>
-          &copy; 2025 FoodieTwinzz. All rights reserved.
+          &copy; {new Date().getFullYear()} FoodieTwinzz. All rights reserved.
         </p>
         <p style={{
           fontFamily: "var(--font-mono)",
           fontSize: 11,
           color: "rgba(242,237,228,0.3)",
         }}>
-          Made with 🥢 in Anaheim
+          Made with 🥢
         </p>
       </div>
     </footer>
